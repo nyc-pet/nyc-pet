@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { Check, X } from "lucide-react";
 
-export default function AdminActions({ postId }: { postId: string }) {
-  const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
+export default function AdminActions({ postId, compact = false }: { postId: string; compact?: boolean }) {
+  const [loading, setLoading] = useState<"approve" | "delete" | null>(null);
   const router = useRouter();
 
   async function handleApprove() {
@@ -17,13 +17,26 @@ export default function AdminActions({ postId }: { postId: string }) {
     router.refresh();
   }
 
-  async function handleReject() {
+  async function handleDelete() {
     if (!confirm("Delete this post permanently?")) return;
-    setLoading("reject");
+    setLoading("delete");
     const supabase = createClient();
     await supabase.from("pet_posts").delete().eq("id", postId);
     setLoading(null);
     router.refresh();
+  }
+
+  if (compact) {
+    return (
+      <button
+        onClick={handleDelete}
+        disabled={!!loading}
+        className="flex items-center gap-1 bg-red-100 hover:bg-red-200 disabled:opacity-50 text-red-600 font-nunito font-semibold text-xs px-3 py-2 rounded-full transition-colors"
+      >
+        <X className="w-3.5 h-3.5" />
+        {loading === "delete" ? "Deleting…" : "Delete"}
+      </button>
+    );
   }
 
   return (
@@ -37,12 +50,12 @@ export default function AdminActions({ postId }: { postId: string }) {
         {loading === "approve" ? "Approving…" : "Approve"}
       </button>
       <button
-        onClick={handleReject}
+        onClick={handleDelete}
         disabled={!!loading}
         className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 disabled:opacity-50 text-red-600 font-nunito font-semibold text-sm px-5 py-2.5 rounded-full transition-colors"
       >
         <X className="w-4 h-4" />
-        {loading === "reject" ? "Deleting…" : "Reject"}
+        {loading === "delete" ? "Deleting…" : "Reject"}
       </button>
     </div>
   );
