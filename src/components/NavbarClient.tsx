@@ -69,7 +69,7 @@ export default function NavbarClient({ userEmail }: Props) {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${bg}`}
-        style={solid ? { background: "linear-gradient(135deg, #ffffff 0%, #b8d4ee 100%)" } : {}}
+        style={solid ? { background: "linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)" } : {}}
       >
         <div className="w-full px-6 flex items-center justify-between gap-4 py-2">
 
