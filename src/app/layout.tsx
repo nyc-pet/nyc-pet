@@ -3,7 +3,6 @@ import { Fredoka, Nunito } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import MobileBottomNav from "@/components/MobileBottomNav";
 
 
 const fredoka = Fredoka({
@@ -34,9 +33,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${fredoka.variable} ${nunito.variable} font-nunito antialiased bg-gray-50 text-gray-900`}>
         <Navbar />
-        <div className="pb-16 md:pb-0">{children}</div>
-        <div className="hidden md:block"><Footer /></div>
-        <MobileBottomNav />
+        {children}
+        <Footer />
       </body>
     </html>
   );

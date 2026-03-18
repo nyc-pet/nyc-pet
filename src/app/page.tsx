@@ -174,7 +174,7 @@ export default async function HomePage({
       </section>
 
       {/* ── MAP ── */}
-      <section className="relative w-full mt-[88px] sm:mt-0 h-[calc(100vh-88px-64px)] sm:h-[700px] overflow-hidden bg-[#020617]">
+      <section className="relative w-full mt-[88px] sm:mt-0 h-[calc(100vh-88px)] sm:h-[700px] overflow-hidden bg-[#020617]">
         {/* Map as full background */}
         <div className="absolute inset-0 z-0 isolate">
           <PetMapWrapper posts={activePosts} />
@@ -234,6 +234,14 @@ export default async function HomePage({
           </div>
           <div className="w-px h-4 bg-gray-200" />
           <span className="font-nunito text-xs text-gray-500">{activePosts.length} active pins</span>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none sm:hidden">
+          <span className="font-nunito text-[10px] font-semibold tracking-widest uppercase text-white/40">Scroll</span>
+          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center pt-2">
+            <div className="w-1 h-2 rounded-full bg-white/70 animate-scroll-dot" />
+          </div>
         </div>
       </section>
 
