@@ -56,7 +56,7 @@ export default function NavbarClient({ userEmail }: Props) {
   }
 
   const solid  = isSolid || scrolled || isMobile;
-  const bg     = solid ? "bg-white shadow-md border-b border-gray-100" : "bg-transparent";
+  const bg     = solid ? "bg-white shadow-sm" : "bg-transparent";
   const logo   = solid ? "text-[#1c314e]" : "text-white";
   const pill   = solid ? "bg-gray-100" : "bg-white/20 backdrop-blur-sm";
   const link   = solid ? "text-gray-600 hover:bg-white hover:text-gray-900" : "text-white hover:bg-white/20";
@@ -68,16 +68,16 @@ export default function NavbarClient({ userEmail }: Props) {
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${bg}`}>
-        <div className="w-full px-6 flex items-center justify-between gap-4 py-3">
+        <div className="w-full px-6 flex items-center justify-between gap-4 py-2">
 
           {/* Logo */}
           <Link href="/" className="shrink-0">
             <Image
               src="/new-logo-nyc-pet.png"
               alt="nyc.pet"
-              width={160}
-              height={60}
-              className="h-11 w-auto transition-all duration-300"
+              width={200}
+              height={74}
+              className="h-14 w-auto transition-all duration-300"
               style={{ filter: solid ? "brightness(0)" : "brightness(0) invert(1)" }}
             />
           </Link>
