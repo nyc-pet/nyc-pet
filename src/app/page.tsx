@@ -7,7 +7,7 @@ import type { PetPost } from "@/lib/types";
 import PetCard from "@/components/PetCard";
 import FilterBar from "@/components/FilterBar";
 import PetMapWrapper from "@/components/PetMapWrapper";
-import { Search, MapPin, Heart } from "lucide-react";
+import { Search, MapPin, Heart, ArrowUpRight } from "lucide-react";
 import PawIcon from "@/components/PawIcon";
 
 async function getPosts(status?: string, borough?: string, species?: string): Promise<PetPost[]> {
@@ -183,42 +183,53 @@ export default async function HomePage({
 
         {/* Top-right overlay — title + stats in a frosted card */}
         <div className="absolute top-10 right-4 z-20 pointer-events-none max-w-[calc(100vw-2rem)]">
-          <div className="bg-[#1c314e] border border-blue-400/30 rounded-2xl px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-            {/* Title */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400" />
-                </span>
-                <span className="font-nunito text-green-400 text-xs font-semibold tracking-widest uppercase">Live Map</span>
+          <div className="bg-[#1c314e] border border-blue-400/30 rounded-2xl px-4 sm:px-6 py-4 sm:py-5 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+              {/* Title */}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400" />
+                  </span>
+                  <span className="font-nunito text-green-400 text-xs font-semibold tracking-widest uppercase">Live Map</span>
+                </div>
+                <h2 className="font-fredoka text-2xl sm:text-4xl font-semibold text-white leading-tight">
+                  Pets Near You
+                </h2>
+                <p className="font-nunito text-white/60 text-xs mt-0.5">All five NYC boroughs</p>
               </div>
-              <h2 className="font-fredoka text-2xl sm:text-4xl font-semibold text-white leading-tight">
-                Pets Near You
-              </h2>
-              <p className="font-nunito text-white/60 text-xs mt-0.5">All five NYC boroughs</p>
+
+              {/* Divider */}
+              <div className="hidden sm:block w-px h-14 bg-white/15" />
+
+              {/* Stats */}
+              <div className="flex items-center gap-3">
+                <div className="text-center">
+                  <p className="font-fredoka text-xl sm:text-2xl font-semibold text-red-400">{lostCount}</p>
+                  <p className="font-nunito text-xs text-white/50">Lost</p>
+                </div>
+                <div className="w-px h-8 bg-white/15" />
+                <div className="text-center">
+                  <p className="font-fredoka text-xl sm:text-2xl font-semibold text-green-400">{foundCount}</p>
+                  <p className="font-nunito text-xs text-white/50">Found</p>
+                </div>
+                <div className="w-px h-8 bg-white/15" />
+                <div className="text-center">
+                  <p className="font-fredoka text-xl sm:text-2xl font-semibold text-blue-400">{reunitedCount}</p>
+                  <p className="font-nunito text-xs text-white/50">Reunited</p>
+                </div>
+              </div>
             </div>
 
-            {/* Divider */}
-            <div className="hidden sm:block w-px h-14 bg-white/15" />
-
-            {/* Stats */}
-            <div className="flex items-center gap-3">
-              <div className="text-center">
-                <p className="font-fredoka text-xl sm:text-2xl font-semibold text-red-400">{lostCount}</p>
-                <p className="font-nunito text-xs text-white/50">Lost</p>
-              </div>
-              <div className="w-px h-8 bg-white/15" />
-              <div className="text-center">
-                <p className="font-fredoka text-xl sm:text-2xl font-semibold text-green-400">{foundCount}</p>
-                <p className="font-nunito text-xs text-white/50">Found</p>
-              </div>
-              <div className="w-px h-8 bg-white/15" />
-              <div className="text-center">
-                <p className="font-fredoka text-xl sm:text-2xl font-semibold text-blue-400">{reunitedCount}</p>
-                <p className="font-nunito text-xs text-white/50">Reunited</p>
-              </div>
-            </div>
+            {/* CTA button */}
+            <Link
+              href="/#listings"
+              className="pointer-events-auto flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-[#1c314e] font-fredoka font-semibold text-sm py-2.5 rounded-xl transition-colors"
+            >
+              View Listings
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
 

@@ -51,19 +51,19 @@ body {
   line-height: 44px !important;
   border-radius: 50% !important;
   border: none !important;
-  background: rgba(15, 31, 51, 0.85) !important;
-  color: rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #1c314e !important;
   font-size: 22px !important;
   font-weight: 300 !important;
   backdrop-filter: blur(8px) !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.35) !important;
-  transition: background 0.2s !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25) !important;
+  transition: background 0.2s, color 0.2s !important;
 }
 
 .leaflet-control-zoom-in:hover,
 .leaflet-control-zoom-out:hover {
-  background: rgba(28, 49, 78, 0.95) !important;
-  color: #fff !important;
+  background: #fff !important;
+  color: #1c314e !important;
 }
 
 .leaflet-control-attribution {

@@ -36,19 +36,20 @@ function RecenterMap({ posts }: { posts: PetPost[] }) {
   useEffect(() => {
     if (posts.length > 0) {
       const bounds = L.latLngBounds(posts.map((p) => [p.lat, p.lng]));
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 12 });
     }
   }, [map, posts]);
   return null;
 }
 
 export default function PetMap({ posts }: { posts: PetPost[] }) {
-  const NYC_CENTER: [number, number] = [40.7128, -74.006];
+  // Center chosen to show all 5 boroughs comfortably
+  const NYC_CENTER: [number, number] = [40.650, -73.940];
 
   return (
     <MapContainer
       center={NYC_CENTER}
-      zoom={11}
+      zoom={10}
       className="w-full h-full"
       scrollWheelZoom={true}
       style={{ background: "#242f3e" }}
