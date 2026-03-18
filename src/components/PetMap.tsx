@@ -7,29 +7,29 @@ import Link from "next/link";
 import type { PetPost } from "@/lib/types";
 import "leaflet/dist/leaflet.css";
 
-// Fix default marker icons in Next.js
-delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+function makePinIcon(color: string, pulseColor: string) {
+  return L.divIcon({
+    className: "",
+    iconSize: [36, 44],
+    iconAnchor: [18, 44],
+    popupAnchor: [0, -46],
+    html: `
+      <div class="map-pin-bounce" style="position:relative;width:36px;height:44px;">
+        <div class="map-pin-pulse" style="
+          position:absolute;top:4px;left:4px;
+          width:28px;height:28px;border-radius:50%;
+          background:${pulseColor};
+        "></div>
+        <svg viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:36px;height:44px;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35))">
+          <path d="M18 2C10.268 2 4 8.268 4 16c0 10.5 14 26 14 26s14-15.5 14-26C32 8.268 25.732 2 18 2z" fill="${color}"/>
+          <circle cx="18" cy="16" r="6" fill="white" opacity="0.9"/>
+        </svg>
+      </div>`,
+  });
+}
 
-const LOST_ICON = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
-
-const FOUND_ICON = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+const LOST_ICON  = makePinIcon("#ef4444", "rgba(239,68,68,0.4)");
+const FOUND_ICON = makePinIcon("#22c55e", "rgba(34,197,94,0.4)");
 
 function RecenterMap({ posts }: { posts: PetPost[] }) {
   const map = useMap();

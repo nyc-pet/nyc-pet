@@ -36,7 +36,7 @@ body {
 .leaflet-control-zoom {
   border: none !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
-  margin-top: 20px !important;
+  margin-top: 72px !important;
   margin-left: 16px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -78,6 +78,24 @@ body {
 
 .leaflet-control-attribution a {
   color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* ── Map pin pulse animation ── */
+@keyframes pin-pulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  50%  { transform: scale(2.2); opacity: 0;   }
+  100% { transform: scale(1);   opacity: 0;   }
+}
+@keyframes pin-bounce {
+  0%, 100% { transform: translateY(0);   }
+  40%       { transform: translateY(-6px); }
+  60%       { transform: translateY(-3px); }
+}
+.map-pin-pulse {
+  animation: pin-pulse 2s ease-out infinite;
+}
+.map-pin-bounce {
+  animation: pin-bounce 2.4s ease-in-out infinite;
 }
 
 /* ── Scroll mouse animation ── */
