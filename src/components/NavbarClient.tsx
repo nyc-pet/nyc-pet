@@ -148,7 +148,7 @@ export default function NavbarClient({ userEmail }: Props) {
 
       {/* Slide-in drawer from right */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 z-50 bg-[#020617] flex flex-col transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-full sm:w-80 z-50 bg-[#020617] flex flex-col transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Drawer header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
