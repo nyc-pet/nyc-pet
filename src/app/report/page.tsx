@@ -40,6 +40,7 @@ function SectionCard({ step, title, icon, children }: { step: number; title: str
 export default function ReportPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
   const [photos, setPhotos] = useState<Array<{ file: File; preview: string }>>([]);
 
@@ -116,6 +117,7 @@ export default function ReportPage() {
         breed: form.breed || null,
         name: form.name || null,
         contact_phone: form.contact_phone || null,
+        approved: false,
       })
       .select()
       .single();
@@ -126,7 +128,7 @@ export default function ReportPage() {
       console.error(error);
       return;
     }
-    router.push(`/pet/${data.id}`);
+    setSubmitted(true);
   }
 
   const speciesOptions: { value: PetSpecies; emoji: string; label: string }[] = [
@@ -136,6 +138,39 @@ export default function ReportPage() {
     { value: "rabbit", emoji: "🐇", label: "Rabbit" },
     { value: "other",  emoji: "🐾", label: "Other" },
   ];
+
+  if (submitted) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-3xl border border-gray-100 shadow-sm p-10 text-center">
+          <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-5">
+            <span className="text-3xl">🕐</span>
+          </div>
+          <h2 className="font-fredoka text-3xl font-semibold text-gray-900 mb-2">Report Submitted!</h2>
+          <p className="font-nunito text-gray-500 text-sm leading-relaxed mb-6">
+            Your report is <span className="font-semibold text-yellow-600">pending review</span>. Our team will approve it shortly and it will appear on the live map once approved.
+          </p>
+          <div className="bg-yellow-50 border border-yellow-100 rounded-2xl px-4 py-3 mb-6">
+            <p className="font-nunito text-yellow-700 text-xs font-semibold">⏱ Usually approved within a few hours</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => router.push("/profile")}
+              className="w-full bg-[#1c314e] hover:bg-[#1c314e]/80 text-white font-fredoka font-semibold text-base py-3 rounded-2xl transition-colors"
+            >
+              View My Reports
+            </button>
+            <button
+              onClick={() => router.push("/")}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-fredoka font-semibold text-base py-3 rounded-2xl transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">

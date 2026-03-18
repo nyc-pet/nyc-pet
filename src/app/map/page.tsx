@@ -18,6 +18,7 @@ async function getPosts(
   let query = supabase
     .from("pet_posts")
     .select("*")
+    .eq("approved", true)
     .order("created_at", { ascending: false });
 
   if (status && status !== "all") query = query.eq("status", status);

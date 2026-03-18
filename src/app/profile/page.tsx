@@ -119,8 +119,11 @@ export default async function ProfilePage() {
                   {/* Info */}
                   <div className="flex-1 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className={`font-fredoka font-semibold text-xs px-2.5 py-1 rounded-full ${s.pill}`}>{s.label}</span>
+                        {!post.approved && (
+                          <span className="font-fredoka font-semibold text-xs px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700">⏳ Pending Review</span>
+                        )}
                         <span className="font-nunito text-xs text-gray-400">Posted {posted}</span>
                       </div>
                       <h3 className="font-fredoka text-xl font-semibold text-gray-900 truncate">

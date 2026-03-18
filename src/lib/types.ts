@@ -22,6 +22,7 @@ export interface PetPost {
   contact_email: string;
   contact_phone: string | null;
   user_id: string | null;
+  approved: boolean;
 }
 
 export type Database = {
