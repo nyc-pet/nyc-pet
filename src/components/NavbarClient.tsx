@@ -77,7 +77,7 @@ export default function NavbarClient({ userEmail }: Props) {
               alt="nyc.pet"
               width={200}
               height={74}
-              className="h-14 w-auto transition-all duration-300"
+              className="h-20 w-auto transition-all duration-300"
               style={{ filter: solid ? "brightness(0)" : "brightness(0) invert(1)" }}
             />
           </Link>
@@ -165,7 +165,7 @@ export default function NavbarClient({ userEmail }: Props) {
               alt="nyc.pet"
               width={200}
               height={74}
-              className="h-14 w-auto"
+              className="h-20 w-auto"
               style={{ filter: "brightness(0) invert(1)" }}
             />
           </Link>

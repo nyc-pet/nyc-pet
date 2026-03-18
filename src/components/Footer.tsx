@@ -16,7 +16,7 @@ export default function Footer() {
                 alt="nyc.pet"
                 width={220}
                 height={82}
-                className="h-16 w-auto"
+                className="h-20 w-auto"
                 style={{ filter: "brightness(0) invert(1)" }}
               />
             </Link>
