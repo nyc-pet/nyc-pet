@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X, LogOut, Search } from "lucide-react";
-import PawIcon from "./PawIcon";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase-browser";
 
 // Pages where the navbar should always be solid (no hero behind it)
@@ -71,9 +71,15 @@ export default function NavbarClient({ userEmail }: Props) {
         <div className="w-full px-6 flex items-center justify-between gap-4 py-5">
 
           {/* Logo */}
-          <Link href="/" className={`flex items-center gap-2.5 text-3xl font-fredoka font-semibold tracking-wide shrink-0 drop-shadow transition-colors ${logo}`}>
-            <PawIcon size={32} color={solid ? "dark" : "white"} />
-            nyc.pet
+          <Link href="/" className="shrink-0">
+            <Image
+              src="/new-logo-nyc-pet.png"
+              alt="nyc.pet"
+              width={120}
+              height={44}
+              className="h-9 w-auto transition-all duration-300"
+              style={{ filter: solid ? "brightness(0)" : "brightness(0) invert(1)" }}
+            />
           </Link>
 
           {/* Center nav pills */}
@@ -153,9 +159,15 @@ export default function NavbarClient({ userEmail }: Props) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-12 pb-6">
-          <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 text-white font-fredoka font-semibold text-2xl">
-            <PawIcon size={28} color="white" />
-            nyc.pet
+          <Link href="/" onClick={() => setMenuOpen(false)}>
+            <Image
+              src="/new-logo-nyc-pet.png"
+              alt="nyc.pet"
+              width={120}
+              height={44}
+              className="h-9 w-auto"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
           </Link>
           <button onClick={() => setMenuOpen(false)}
             className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">

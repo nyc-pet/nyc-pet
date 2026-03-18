@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Instagram, Twitter } from "lucide-react";
-import PawIcon from "./PawIcon";
 
 export default function Footer() {
   return (
@@ -10,8 +10,15 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 text-white text-2xl font-fredoka font-semibold mb-3">
-              <PawIcon size={24} color="white" /> nyc.pet
+            <Link href="/" className="inline-block mb-3">
+              <Image
+                src="/new-logo-nyc-pet.png"
+                alt="nyc.pet"
+                width={140}
+                height={52}
+                className="h-10 w-auto"
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
             </Link>
             <p className="font-nunito text-white/50 text-sm leading-relaxed max-w-xs">
               NYC&apos;s free community platform for lost & found pets. Helping reunite pets with their families across all five boroughs.
