@@ -14,9 +14,9 @@ export default function Footer() {
               <Image
                 src="/new-logo-nyc-pet.png"
                 alt="nyc.pet"
-                width={140}
-                height={52}
-                className="h-10 w-auto"
+                width={220}
+                height={82}
+                className="h-16 w-auto"
                 style={{ filter: "brightness(0) invert(1)" }}
               />
             </Link>
