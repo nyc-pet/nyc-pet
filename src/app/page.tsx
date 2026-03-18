@@ -182,7 +182,7 @@ export default async function HomePage({
 
 
         {/* Top-right overlay — title + stats in a frosted card */}
-        <div className="absolute top-4 right-4 z-20 pointer-events-none max-w-[calc(100vw-2rem)]">
+        <div className="absolute top-10 right-4 z-20 pointer-events-none max-w-[calc(100vw-2rem)]">
           <div className="bg-[#1c314e] border border-blue-400/30 rounded-2xl px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
             {/* Title */}
             <div>
