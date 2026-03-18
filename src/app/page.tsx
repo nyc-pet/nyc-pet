@@ -176,7 +176,7 @@ export default async function HomePage({
       {/* ── MAP ── */}
       <section className="relative w-full mt-[88px] sm:mt-0 h-[calc(100vh-88px-64px)] sm:h-[700px] overflow-hidden bg-[#020617]">
         {/* Map as full background */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 isolate">
           <PetMapWrapper posts={activePosts} />
         </div>
 

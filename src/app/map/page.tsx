@@ -46,7 +46,7 @@ export default async function MapPage({
       style={{ height: "calc(100vh - 88px)", marginTop: "88px" }}
     >
       {/* ── FULL-WIDTH MAP ── */}
-      <div className="flex-1 relative min-w-0 overflow-hidden">
+      <div className="flex-1 relative min-w-0 overflow-hidden z-0 isolate">
         <PetMapWrapper posts={activePosts} />
 
         {/* Floating legend */}
