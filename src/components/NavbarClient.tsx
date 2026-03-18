@@ -68,16 +68,16 @@ export default function NavbarClient({ userEmail }: Props) {
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${bg}`}>
-        <div className="w-full px-6 flex items-center justify-between gap-4 py-5">
+        <div className="w-full px-6 flex items-center justify-between gap-4 py-3">
 
           {/* Logo */}
           <Link href="/" className="shrink-0">
             <Image
               src="/new-logo-nyc-pet.png"
               alt="nyc.pet"
-              width={200}
-              height={74}
-              className="h-20 w-auto transition-all duration-300"
+              width={160}
+              height={60}
+              className="h-11 w-auto transition-all duration-300"
               style={{ filter: solid ? "brightness(0)" : "brightness(0) invert(1)" }}
             />
           </Link>
