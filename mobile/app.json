@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "NYC Pet",
+    "slug": "nyc-pet",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f97316"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.nycpet.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We use your location to show nearby lost and found pets.",
+        "NSPhotoLibraryUsageDescription": "We need access to your photos to upload a pet photo.",
+        "NSCameraUsageDescription": "We need access to your camera to take a pet photo."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f97316"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ],
+      "package": "com.nycpet.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "We need access to your photos to upload a pet photo."
+        }
+      ]
+    ],
+    "scheme": "nycpet",
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
