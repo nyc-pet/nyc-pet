@@ -12,6 +12,20 @@ const PetMap = dynamic(() => import("@/components/PetMap"), {
   ),
 });
 
-export default function PetMapWrapper({ posts }: { posts: PetPost[] }) {
-  return <PetMap posts={posts} />;
+export default function PetMapWrapper({
+  posts,
+  interactive = true,
+}: {
+  posts: PetPost[];
+  interactive?: boolean;
+}) {
+  return (
+    <div className="relative w-full h-full">
+      <PetMap posts={posts} />
+      {/* On mobile, block touch so the page scrolls instead of the map */}
+      {!interactive && (
+        <div className="absolute inset-0 sm:hidden" style={{ touchAction: "pan-y" }} />
+      )}
+    </div>
+  );
 }
