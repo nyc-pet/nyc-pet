@@ -236,12 +236,12 @@ export default async function HomePage({
           <span className="font-nunito text-xs text-gray-500">{activePosts.length} active pins</span>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none sm:hidden">
-          <span className="font-nunito text-[10px] font-semibold tracking-widest uppercase text-white/40">Scroll</span>
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center pt-2">
-            <div className="w-1 h-2 rounded-full bg-white/70 animate-scroll-dot" />
+        {/* Scroll indicator — pushed up to clear iOS Safari browser bar */}
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none sm:hidden">
+          <div className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center pt-2">
+            <div className="w-1.5 h-2.5 rounded-full bg-white/80 animate-scroll-dot" />
           </div>
+          <span className="font-nunito text-[10px] font-semibold tracking-widest uppercase text-white/40">Scroll</span>
         </div>
       </section>
 
