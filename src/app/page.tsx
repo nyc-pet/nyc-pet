@@ -223,7 +223,7 @@ export default async function HomePage({
         </div>
 
         {/* Bottom-left overlay — legend */}
-        <div className="absolute bottom-5 left-5 z-20 bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg flex items-center gap-4 pointer-events-none">
+        <div className="absolute bottom-5 sm:bottom-5 left-5 z-20 bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg flex items-center gap-4 pointer-events-none" style={{ bottom: "max(20px, env(safe-area-inset-bottom, 20px) + 60px)" }}>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
             <span className="font-nunito text-xs font-semibold text-gray-700">Lost</span>
@@ -236,8 +236,8 @@ export default async function HomePage({
           <span className="font-nunito text-xs text-gray-500">{activePosts.length} active pins</span>
         </div>
 
-        {/* Scroll indicator — pushed up to clear iOS Safari browser bar */}
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none sm:hidden">
+        {/* Scroll indicator — uses safe-area to always clear iOS Safari bar */}
+        <div className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none sm:hidden" style={{ bottom: "max(28px, env(safe-area-inset-bottom, 28px) + 72px)" }}>
           <div className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center pt-2">
             <div className="w-1.5 h-2.5 rounded-full bg-white/80 animate-scroll-dot" />
           </div>

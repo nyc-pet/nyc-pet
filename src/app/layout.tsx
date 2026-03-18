@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     description: "Help reunite lost pets with their families in New York City.",
     siteName: "nyc.pet",
   },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
