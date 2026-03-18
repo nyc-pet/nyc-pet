@@ -146,95 +146,112 @@ export default function NavbarClient({ userEmail }: Props) {
         className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       />
 
-      {/* Slide-in drawer from right */}
+      {/* Slide-in drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-80 z-50 bg-[#020617] flex flex-col transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-full sm:w-[400px] z-50 flex flex-col transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
+        style={{ background: "linear-gradient(160deg, #0f1f33 0%, #020617 60%)" }}
       >
-        {/* Drawer header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-          <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 text-white text-xl font-fredoka font-semibold">
-            <PawIcon size={20} color="white" />
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-12 pb-6">
+          <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 text-white font-fredoka font-semibold text-2xl">
+            <PawIcon size={28} color="white" />
             nyc.pet
           </Link>
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-          >
-            <X className="w-4 h-4" />
+          <button onClick={() => setMenuOpen(false)}
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Drawer body */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-8">
-
-          {/* Quick actions */}
-          <div className="grid grid-cols-3 gap-2">
-            <Link href="/#listings" onClick={() => setMenuOpen(false)}
-              className="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-2xl py-4 px-2 transition-colors">
-              <Search className="w-5 h-5" />
-              <span className="font-nunito font-semibold text-xs text-center leading-tight">Find Pets</span>
-            </Link>
-            <Link href="/report" onClick={() => setMenuOpen(false)}
-              className="flex flex-col items-center gap-2 bg-[#1c314e] hover:bg-[#1c314e]/80 text-white rounded-2xl py-4 px-2 transition-colors">
-              <ArrowUpRight className="w-5 h-5" />
-              <span className="font-nunito font-semibold text-xs text-center leading-tight">Report a Pet</span>
-            </Link>
-            <Link href="/map" onClick={() => setMenuOpen(false)}
-              className="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-2xl py-4 px-2 transition-colors">
-              <span className="relative flex h-2.5 w-2.5">
+        {/* Big CTA buttons */}
+        <div className="px-6 pb-6 grid grid-cols-2 gap-3">
+          <Link href="/#listings" onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-3 bg-white/10 hover:bg-white/15 rounded-2xl px-4 py-4 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+              <Search className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-fredoka font-semibold text-white text-base leading-tight">Find Pets</p>
+              <p className="font-nunito text-white/40 text-xs">Browse listings</p>
+            </div>
+          </Link>
+          <Link href="/map" onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-3 bg-white/10 hover:bg-white/15 rounded-2xl px-4 py-4 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center shrink-0">
+              <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400" />
               </span>
-              <span className="font-nunito font-semibold text-xs text-center leading-tight">View Map</span>
-            </Link>
-          </div>
+            </div>
+            <div>
+              <p className="font-fredoka font-semibold text-white text-base leading-tight">Live Map</p>
+              <p className="font-nunito text-white/40 text-xs">NYC pets</p>
+            </div>
+          </Link>
+          <Link href="/report" onClick={() => setMenuOpen(false)}
+            className="col-span-2 flex items-center justify-between bg-[#1c314e] hover:bg-[#1c314e]/80 rounded-2xl px-5 py-4 transition-colors">
+            <div>
+              <p className="font-fredoka font-semibold text-white text-lg leading-tight">Report a Pet</p>
+              <p className="font-nunito text-white/50 text-xs">Lost or found a pet?</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+              <ArrowUpRight className="w-5 h-5 text-white" />
+            </div>
+          </Link>
+        </div>
 
+        {/* Divider */}
+        <div className="mx-6 border-t border-white/10" />
+
+        {/* Nav links */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           <div>
-            <p className="font-nunito text-xs font-semibold tracking-widest uppercase text-white/30 mb-4">Browse</p>
-            <ul className="space-y-1">
+            <p className="font-nunito text-xs font-bold tracking-widest uppercase text-white/25 mb-3">Browse</p>
+            <div className="space-y-0.5">
               {browseLinks.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} onClick={() => setMenuOpen(false)} className="font-nunito font-semibold text-lg text-white/70 hover:text-white py-2.5 block transition-colors border-b border-white/5">
-                    {l.label}
-                  </Link>
-                </li>
+                <Link key={l.label} href={l.href} onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between font-fredoka font-semibold text-xl text-white/60 hover:text-white py-3 border-b border-white/5 transition-colors group">
+                  {l.label}
+                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity" />
+                </Link>
               ))}
-            </ul>
+            </div>
           </div>
-
           <div>
-            <p className="font-nunito text-xs font-semibold tracking-widest uppercase text-white/30 mb-4">Company</p>
-            <ul className="space-y-1">
+            <p className="font-nunito text-xs font-bold tracking-widest uppercase text-white/25 mb-3">Company</p>
+            <div className="space-y-0.5">
               {companyLinks.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} onClick={() => setMenuOpen(false)} className="font-nunito font-semibold text-lg text-white/70 hover:text-white py-2.5 block transition-colors border-b border-white/5">
-                    {l.label}
-                  </Link>
-                </li>
+                <Link key={l.label} href={l.href} onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between font-fredoka font-semibold text-xl text-white/60 hover:text-white py-3 border-b border-white/5 transition-colors group">
+                  {l.label}
+                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity" />
+                </Link>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
 
-        {/* Drawer footer */}
-        <div className="px-6 py-6 border-t border-white/10 flex flex-col gap-3">
-          {/* Auth row */}
+        {/* Footer / Auth */}
+        <div className="px-6 py-6 border-t border-white/10">
           {userEmail ? (
-            <div className="bg-white/10 rounded-2xl p-3 space-y-2">
-              <div className="flex items-center gap-3 px-1">
-                <div className="w-9 h-9 rounded-full bg-[#1c314e] flex items-center justify-center shrink-0">
-                  <span className="font-fredoka font-semibold text-white uppercase">{userEmail.charAt(0)}</span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-[#1c314e] border-2 border-white/20 flex items-center justify-center shrink-0">
+                  <span className="font-fredoka font-semibold text-white text-lg uppercase">{userEmail.charAt(0)}</span>
                 </div>
-                <span className="font-nunito text-sm text-white/60 truncate">{userEmail}</span>
+                <div className="min-w-0">
+                  <p className="font-fredoka font-semibold text-white text-base">My Account</p>
+                  <p className="font-nunito text-white/40 text-xs truncate">{userEmail}</p>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Link href="/profile" onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-nunito font-semibold text-sm py-2.5 rounded-xl transition-colors">
+                  className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-nunito font-semibold text-sm py-3 rounded-2xl transition-colors">
                   My Profile
                 </Link>
                 <button onClick={() => { handleLogout(); setMenuOpen(false); }}
-                  className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white/60 font-nunito font-semibold text-sm py-2.5 rounded-xl transition-colors">
-                  <LogOut className="w-3.5 h-3.5" /> Sign out
+                  className="flex items-center justify-center gap-2 bg-white/5 hover:bg-red-500/20 text-white/50 hover:text-red-400 font-nunito font-semibold text-sm py-3 rounded-2xl transition-colors">
+                  <LogOut className="w-4 h-4" /> Sign out
                 </button>
               </div>
             </div>
@@ -242,22 +259,11 @@ export default function NavbarClient({ userEmail }: Props) {
             <Link
               href="/login"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-nunito font-semibold text-base py-3 rounded-2xl transition-all"
+              className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-nunito font-semibold text-base py-3.5 rounded-2xl transition-all"
             >
               Sign In to your account
             </Link>
           )}
-
-          <Link
-            href="/report"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center justify-between bg-[#1c314e] hover:bg-blue-600 text-white font-fredoka font-semibold text-lg px-6 py-4 rounded-2xl transition-all"
-          >
-            Report a Pet
-            <span className="bg-white/20 rounded-full w-9 h-9 flex items-center justify-center">
-              <ArrowUpRight className="w-5 h-5" />
-            </span>
-          </Link>
         </div>
       </div>
     </>
