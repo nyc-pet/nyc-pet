@@ -2,28 +2,31 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase-browser";
 import { Check, X } from "lucide-react";
 
 export default function AdminActions({ postId, compact = false }: { postId: string; compact?: boolean }) {
   const [loading, setLoading] = useState<"approve" | "delete" | null>(null);
   const router = useRouter();
 
-  async function handleApprove() {
-    setLoading("approve");
-    const supabase = createClient();
-    await supabase.from("pet_posts").update({ approved: true }).eq("id", postId);
+  async function callAdmin(action: "approve" | "delete") {
+    setLoading(action);
+    const res = await fetch("/api/admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, postId }),
+    });
     setLoading(null);
+    if (!res.ok) {
+      const { error } = await res.json();
+      alert(`Error: ${error}`);
+      return;
+    }
     router.refresh();
   }
 
   async function handleDelete() {
     if (!confirm("Delete this post permanently?")) return;
-    setLoading("delete");
-    const supabase = createClient();
-    await supabase.from("pet_posts").delete().eq("id", postId);
-    setLoading(null);
-    router.refresh();
+    callAdmin("delete");
   }
 
   if (compact) {
@@ -42,7 +45,7 @@ export default function AdminActions({ postId, compact = false }: { postId: stri
   return (
     <div className="flex sm:flex-col gap-2 shrink-0">
       <button
-        onClick={handleApprove}
+        onClick={() => callAdmin("approve")}
         disabled={!!loading}
         className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-nunito font-semibold text-sm px-5 py-2.5 rounded-full transition-colors"
       >
