@@ -4,35 +4,47 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 const ADMIN_EMAIL = "rr@rubayath.com";
 
-function getServiceClient() {
-  return createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
-
 export async function POST(req: NextRequest) {
   // Verify the caller is the admin
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.email !== ADMIN_EMAIL) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Not logged in" }, { status: 401 });
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      return NextResponse.json({ error: `Not admin (got ${user.email})` }, { status: 401 });
+    }
+
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) {
+      return NextResponse.json({ error: "Service key not configured" }, { status: 500 });
+    }
+
+    const service = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceKey
+    );
+
+    const { action, postId } = await req.json();
+
+    if (action === "approve") {
+      const { error } = await service.from("pet_posts").update({ approved: true }).eq("id", postId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: true });
+    }
+
+    if (action === "delete") {
+      const { error } = await service.from("pet_posts").delete().eq("id", postId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: true });
+    }
+
+    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
-
-  const { action, postId } = await req.json();
-  const service = getServiceClient();
-
-  if (action === "approve") {
-    const { error } = await service.from("pet_posts").update({ approved: true }).eq("id", postId);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true });
-  }
-
-  if (action === "delete") {
-    const { error } = await service.from("pet_posts").delete().eq("id", postId);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true });
-  }
-
-  return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }
