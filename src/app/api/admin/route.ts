@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 const ADMIN_EMAIL = "rr@rubayath.com";
 
 export async function POST(req: NextRequest) {
-  // Verify the caller is the admin
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -14,29 +12,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not logged in" }, { status: 401 });
     }
     if (user.email !== ADMIN_EMAIL) {
-      return NextResponse.json({ error: `Not admin (got ${user.email})` }, { status: 401 });
+      return NextResponse.json({ error: `Not admin` }, { status: 401 });
     }
-
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) {
-      return NextResponse.json({ error: "Service key not configured" }, { status: 500 });
-    }
-
-    const service = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceKey
-    );
 
     const { action, postId } = await req.json();
 
     if (action === "approve") {
-      const { error } = await service.from("pet_posts").update({ approved: true }).eq("id", postId);
+      const { error } = await supabase.from("pet_posts").update({ approved: true }).eq("id", postId);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ ok: true });
     }
 
     if (action === "delete") {
-      const { error } = await service.from("pet_posts").delete().eq("id", postId);
+      const { error } = await supabase.from("pet_posts").delete().eq("id", postId);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ ok: true });
     }
