@@ -15,6 +15,14 @@ function LoginForm() {
   const redirectTo    = searchParams.get("redirectTo") ?? "/";
 
   const [mode, setMode]           = useState<"signin" | "signup" | "reset">("signin");
+
+  function switchMode(m: "signin" | "signup" | "reset") {
+    setMode(m);
+    setError("");
+    setSuccess("");
+    setTurnstileToken("");
+    setTurnstileKey(k => k + 1);
+  }
   const [email, setEmail]         = useState("");
   const [password, setPassword]   = useState("");
   const [showPass, setShowPass]   = useState(false);
@@ -102,11 +110,11 @@ function LoginForm() {
       <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         {/* Tabs */}
         <div className="flex border-b border-gray-100">
-          <button onClick={() => { setMode("signin"); setError(""); setSuccess(""); }}
+          <button onClick={() => switchMode("signin")}
             className={`flex-1 py-4 font-fredoka font-semibold text-base transition-colors ${mode === "signin" ? "text-[#1c314e] border-b-2 border-[#1c314e]" : "text-gray-400 hover:text-gray-600"}`}>
             Sign In
           </button>
-          <button onClick={() => { setMode("signup"); setError(""); setSuccess(""); }}
+          <button onClick={() => switchMode("signup")}
             className={`flex-1 py-4 font-fredoka font-semibold text-base transition-colors ${mode === "signup" ? "text-[#1c314e] border-b-2 border-[#1c314e]" : "text-gray-400 hover:text-gray-600"}`}>
             Create Account
           </button>
@@ -172,7 +180,7 @@ function LoginForm() {
                   </button>
                 </div>
                 {mode === "signin" && (
-                  <button type="button" onClick={() => { setMode("reset"); setError(""); setSuccess(""); }}
+                  <button type="button" onClick={() => switchMode("reset")}
                     className="mt-1.5 font-nunito text-xs text-[#1c314e] hover:underline">
                     Forgot password?
                   </button>
@@ -182,7 +190,9 @@ function LoginForm() {
 
             {/* Turnstile — on all auth forms */}
             {TURNSTILE_SITE_KEY && (
-              <Turnstile key={turnstileKey} siteKey={TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} />
+              <div className="flex justify-center overflow-visible">
+                <Turnstile key={turnstileKey} siteKey={TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} options={{ theme: "light", size: "normal" }} />
+              </div>
             )}
 
             {error   && <p className="font-nunito text-sm text-red-500 bg-red-50 rounded-xl px-4 py-2.5">{error}</p>}
@@ -196,7 +206,7 @@ function LoginForm() {
           </form>
 
           {mode === "reset" && (
-            <button onClick={() => { setMode("signin"); setError(""); setSuccess(""); }}
+            <button onClick={() => switchMode("signin")}
               className="w-full font-nunito text-sm text-gray-400 hover:text-gray-600 text-center">
               ← Back to Sign In
             </button>
