@@ -22,6 +22,7 @@ function LoginForm() {
   const [error, setError]         = useState("");
   const [success, setSuccess]     = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   const supabase = createClient();
 
@@ -31,15 +32,17 @@ function LoginForm() {
     setError("");
     setSuccess("");
 
-    if (mode === "signup" && TURNSTILE_SITE_KEY && !turnstileToken) {
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
       setError("Please complete the security check.");
       setLoading(false);
       return;
     }
 
+    const captchaToken = TURNSTILE_SITE_KEY ? turnstileToken : undefined;
+
     if (mode === "signin") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) { setError(error.message); setLoading(false); return; }
+      const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } });
+      if (error) { setError(error.message); setLoading(false); setTurnstileKey(k => k + 1); return; }
       router.push(redirectTo);
       return;
     }
@@ -48,9 +51,12 @@ function LoginForm() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}` },
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
+          captchaToken,
+        },
       });
-      if (error) { setError(error.message); setLoading(false); return; }
+      if (error) { setError(error.message); setLoading(false); setTurnstileKey(k => k + 1); return; }
       setSuccess("Account created! Check your email to verify before signing in.");
       setLoading(false);
       return;
@@ -59,8 +65,9 @@ function LoginForm() {
     if (mode === "reset") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback?redirectTo=/profile`,
-      });
-      if (error) { setError(error.message); setLoading(false); return; }
+        captchaToken,
+      } as Parameters<typeof supabase.auth.resetPasswordForEmail>[1]);
+      if (error) { setError(error.message); setLoading(false); setTurnstileKey(k => k + 1); return; }
       setSuccess("Password reset email sent! Check your inbox.");
       setLoading(false);
       return;
@@ -173,9 +180,9 @@ function LoginForm() {
               </div>
             )}
 
-            {/* Turnstile — only on signup */}
-            {mode === "signup" && TURNSTILE_SITE_KEY && (
-              <Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} />
+            {/* Turnstile — on all auth forms */}
+            {TURNSTILE_SITE_KEY && (
+              <Turnstile key={turnstileKey} siteKey={TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} />
             )}
 
             {error   && <p className="font-nunito text-sm text-red-500 bg-red-50 rounded-xl px-4 py-2.5">{error}</p>}
