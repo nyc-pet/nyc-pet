@@ -20,8 +20,8 @@ function LoginForm() {
     setMode(m);
     setError("");
     setSuccess("");
-    setTurnstileToken("");
-    setTurnstileKey(k => k + 1);
+    // Don't reset turnstile on mode switch — the silent check token stays valid.
+    // It only resets on error/expire (handled by onError/onExpire props).
   }
   const [email, setEmail]         = useState("");
   const [password, setPassword]   = useState("");
