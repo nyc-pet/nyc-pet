@@ -190,8 +190,15 @@ function LoginForm() {
 
             {/* Turnstile — on all auth forms */}
             {TURNSTILE_SITE_KEY && (
-              <div className="flex justify-center overflow-visible">
-                <Turnstile key={turnstileKey} siteKey={TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} options={{ theme: "light", size: "normal" }} />
+              <div className="flex justify-center">
+                <Turnstile
+                  key={turnstileKey}
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onSuccess={setTurnstileToken}
+                  onError={() => setError("Security check failed. Please refresh and try again.")}
+                  onExpire={() => { setTurnstileToken(""); setTurnstileKey(k => k + 1); }}
+                  options={{ theme: "light", size: "normal", appearance: "always" }}
+                />
               </div>
             )}
 
