@@ -5,32 +5,26 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { Turnstile } from "@marsidev/react-turnstile";
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 function LoginForm() {
   const searchParams  = useSearchParams();
   const router        = useRouter();
   const redirectTo    = searchParams.get("redirectTo") ?? "/";
 
-  const [mode, setMode]           = useState<"signin" | "signup" | "reset">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
 
   function switchMode(m: "signin" | "signup" | "reset") {
     setMode(m);
     setError("");
     setSuccess("");
-    // Don't reset turnstile on mode switch — the silent check token stays valid.
-    // It only resets on error/expire (handled by onError/onExpire props).
   }
-  const [email, setEmail]         = useState("");
-  const [password, setPassword]   = useState("");
-  const [showPass, setShowPass]   = useState(false);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState("");
-  const [success, setSuccess]     = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileKey, setTurnstileKey] = useState(0);
+
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState("");
+  const [success, setSuccess]   = useState("");
 
   const supabase = createClient();
 
@@ -40,17 +34,9 @@ function LoginForm() {
     setError("");
     setSuccess("");
 
-    if (TURNSTILE_SITE_KEY && !turnstileToken) {
-      setError("Please complete the security check.");
-      setLoading(false);
-      return;
-    }
-
-    const captchaToken = TURNSTILE_SITE_KEY ? turnstileToken : undefined;
-
     if (mode === "signin") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } });
-      if (error) { setError(error.message); setLoading(false); setTurnstileKey(k => k + 1); return; }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) { setError(error.message); setLoading(false); return; }
       router.push(redirectTo);
       return;
     }
@@ -61,10 +47,9 @@ function LoginForm() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
-          captchaToken,
         },
       });
-      if (error) { setError(error.message); setLoading(false); setTurnstileKey(k => k + 1); return; }
+      if (error) { setError(error.message); setLoading(false); return; }
       setSuccess("Account created! Check your email to verify before signing in.");
       setLoading(false);
       return;
@@ -73,9 +58,8 @@ function LoginForm() {
     if (mode === "reset") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback?redirectTo=/profile`,
-        captchaToken,
-      } as Parameters<typeof supabase.auth.resetPasswordForEmail>[1]);
-      if (error) { setError(error.message); setLoading(false); setTurnstileKey(k => k + 1); return; }
+      });
+      if (error) { setError(error.message); setLoading(false); return; }
       setSuccess("Password reset email sent! Check your inbox.");
       setLoading(false);
       return;
@@ -185,20 +169,6 @@ function LoginForm() {
                     Forgot password?
                   </button>
                 )}
-              </div>
-            )}
-
-            {/* Turnstile — on all auth forms */}
-            {TURNSTILE_SITE_KEY && (
-              <div className="flex justify-center">
-                <Turnstile
-                  key={turnstileKey}
-                  siteKey={TURNSTILE_SITE_KEY}
-                  onSuccess={setTurnstileToken}
-                  onError={() => setError("Security check failed. Please refresh and try again.")}
-                  onExpire={() => { setTurnstileToken(""); setTurnstileKey(k => k + 1); }}
-                  options={{ theme: "light", size: "normal", appearance: "always" }}
-                />
               </div>
             )}
 
