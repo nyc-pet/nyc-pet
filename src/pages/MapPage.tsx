@@ -104,7 +104,7 @@ export default function MapPage() {
       attribution: '© <a href="https://stadiamaps.com/">Stadia Maps</a>',
       maxZoom: 20,
     }).addTo(map);
-    L.control.zoom({ position: "topleft" }).addTo(map);
+    // zoom control handled by custom buttons
     mapInstance.current = map;
     setMapReady(true);
     return () => { map.remove(); mapInstance.current = null; setMapReady(false); };
@@ -264,12 +264,29 @@ export default function MapPage() {
         <div ref={mapRef} className={showMenu ? "menu-open" : ""} style={{ width: "100%", height: "100%" }} />
 
         {/* Map controls — bottom left stack */}
-        <div style={{ position: "absolute", bottom: 130, left: 16, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ position: "absolute", bottom: 150, left: 16, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* Zoom In */}
+          <button onClick={() => mapInstance.current?.zoomIn()} style={{
+            width: 44, height: 44, borderRadius: 22,
+            background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 22, fontWeight: 300, color: "#1c314e", border: "none", cursor: "pointer",
+          }}>+</button>
+
+          {/* Zoom Out */}
+          <button onClick={() => mapInstance.current?.zoomOut()} style={{
+            width: 44, height: 44, borderRadius: 22,
+            background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 22, fontWeight: 300, color: "#1c314e", border: "none", cursor: "pointer",
+          }}>−</button>
+
           {/* Dark/Light toggle */}
           <button onClick={toggleMapStyle} style={{
             width: 44, height: 44, borderRadius: 22,
             background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
             display: "flex", alignItems: "center", justifyContent: "center",
+            border: "none", cursor: "pointer",
           }}>
             {darkMode ? <Sun size={18} color="#1c314e" strokeWidth={2} /> : <Moon size={18} color="#1c314e" strokeWidth={2} />}
           </button>
@@ -279,6 +296,7 @@ export default function MapPage() {
             width: 44, height: 44, borderRadius: 22,
             background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
             display: "flex", alignItems: "center", justifyContent: "center",
+            border: "none", cursor: "pointer",
           }}>
             {locating
               ? <div style={{ width: 18, height: 18, border: "2.5px solid #e2e8f0", borderTopColor: "#1c314e", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
