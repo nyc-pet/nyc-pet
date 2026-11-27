@@ -752,7 +752,7 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
       {/* Borough picker */}
       {(() => {
         const BOROUGHS = ["Manhattan","Brooklyn","Queens","The Bronx","Staten Island"];
-        const isOther = draft.borough !== "" && !BOROUGHS.includes(draft.borough);
+        const isOther = draft.borough !== "" && draft.borough !== "__other__" && !BOROUGHS.includes(draft.borough);
         const showOtherInput = isOther || draft.borough === "__other__";
         return (
           <div>
@@ -781,7 +781,7 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
                 type="text"
                 placeholder="Type your borough or area…"
                 value={isOther ? draft.borough : ""}
-                onChange={e => setDraft(d => ({ ...d, borough: e.target.value || "__other__" }))}
+                onChange={e => setDraft(d => ({ ...d, borough: e.target.value.trim() ? e.target.value : "__other__" }))}
                 style={{ width:"100%", padding:"14px 16px", background:"#f5f5f7", borderRadius:16, fontSize:15, color:"#111", border:"none", outline:"none", boxSizing:"border-box" }}
               />
             )}
