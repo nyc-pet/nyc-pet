@@ -225,7 +225,7 @@ export default function ReportGate({ onClose }: Props) {
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path fill="#f5f5f7" d="M0 59 H91 C121 59 145 38 167 15 C176 5 183 1 193 1 C204 1 212 5 221 15 C243 38 267 59 297 59 H386 V61 H0 Z"/>
+          <path fill="#111" d="M0 59 H91 C121 59 145 38 167 15 C176 5 183 1 193 1 C204 1 212 5 221 15 C243 38 267 59 297 59 H386 V61 H0 Z"/>
         </svg>
 
         {/* Round arrow button — sits in the wave peak, above home bar */}
@@ -240,8 +240,8 @@ export default function ReportGate({ onClose }: Props) {
             width: 52, height: 52,
             borderRadius: "50%",
             border: "none",
-            background: checked ? "#111" : "#d4d4d4",
-            color: checked ? "#fff" : "#555",
+            background: checked ? "#fff" : "#333",
+            color: checked ? "#111" : "#888",
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: checked ? "pointer" : "default",
             transition: "background 0.25s, color 0.25s",
