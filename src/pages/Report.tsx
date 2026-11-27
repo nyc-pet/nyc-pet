@@ -216,6 +216,7 @@ export default function Report() {
       color:             draft.color || null,
       description:       draft.notes || null,
       last_seen_address: draft.location,
+      last_seen_date:    draft.date || new Date().toISOString().split("T")[0],
       lat,
       lng,
       photo_url:         urls[0],
