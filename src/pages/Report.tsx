@@ -225,7 +225,7 @@ export default function Report() {
       contact_name:      draft.contactName.trim() || "Anonymous",
       contact_email:     "",
       status:            draft.status,
-      species:           draft.species,
+      species:           draft.species?.toLowerCase(),
       name:              draft.name,
       breed:             draft.breed || null,
       color:             draft.color || null,
