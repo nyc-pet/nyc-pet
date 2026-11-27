@@ -264,7 +264,7 @@ export default function MapPage() {
         <div ref={mapRef} className={showMenu ? "menu-open" : ""} style={{ width: "100%", height: "100%" }} />
 
         {/* Map controls — bottom left stack */}
-        <div style={{ position: "absolute", bottom: 130, left: 16, zIndex: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ position: "absolute", bottom: 130, left: 16, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
           {/* Dark/Light toggle */}
           <button onClick={toggleMapStyle} style={{
             width: 44, height: 44, borderRadius: 22,
@@ -288,7 +288,7 @@ export default function MapPage() {
         </div>
 
         {/* Status filter toggles — top right of map */}
-        <div style={{ position: "absolute", top: 16, right: 16, zIndex: 10, display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
+        <div style={{ position: "absolute", top: 16, right: 16, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
           <div style={{ display: "flex", gap: 6, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", borderRadius: 24, padding: 4, boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
             {([
               { key: "all",   label: "All",   dot: null },
