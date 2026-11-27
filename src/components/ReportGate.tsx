@@ -80,10 +80,11 @@ export default function ReportGate({ onClose }: Props) {
         background: "#171716",
         borderRadius: "48px 48px 0 0",
         position: "relative",
+        overflow: "hidden",
         color: "white",
         textAlign: "center",
         containerType: "inline-size",
-        paddingBottom: "env(safe-area-inset-bottom, 16px)",
+        paddingBottom: "calc(72px + env(safe-area-inset-bottom, 20px))",
       }}>
 
         {/* Content */}
@@ -214,27 +215,40 @@ export default function ReportGate({ onClose }: Props) {
             ))}
           </div>
 
-          {/* Round arrow button — centred in the card, well above home bar */}
-          <div style={{ display: "flex", justifyContent: "center", paddingBottom: "8cqw" }}>
-            <button
-              onClick={next}
-              disabled={!checked}
-              style={{
-                width: 56, height: 56,
-                borderRadius: "50%",
-                border: "none",
-                background: checked ? "#f5f5f5" : "#2a2a2a",
-                color: checked ? "#111" : "#666",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: checked ? "pointer" : "default",
-                transition: "background 0.25s, color 0.25s",
-                boxShadow: checked ? "0 4px 20px rgba(255,255,255,0.15)" : "none",
-              }}
-            >
-              <ArrowRight size={22} strokeWidth={2.2} />
-            </button>
-          </div>
         </div>
+
+        {/* Wave SVG */}
+        <svg
+          style={{ position: "absolute", bottom: 0, left: 0, width: "100%", display: "block" }}
+          viewBox="0 0 386 61"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path fill="white" d="M0 59 H91 C121 59 145 38 167 15 C176 5 183 1 193 1 C204 1 212 5 221 15 C243 38 267 59 297 59 H386 V61 H0 Z"/>
+        </svg>
+
+        {/* Round arrow button — sits in the wave peak, above home bar */}
+        <button
+          onClick={next}
+          disabled={!checked}
+          style={{
+            position: "absolute",
+            bottom: "calc(env(safe-area-inset-bottom, 20px) + 18px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 52, height: 52,
+            borderRadius: "50%",
+            border: "none",
+            background: checked ? "#111" : "#d4d4d4",
+            color: checked ? "#fff" : "#555",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: checked ? "pointer" : "default",
+            transition: "background 0.25s, color 0.25s",
+            boxShadow: checked ? "0 4px 16px rgba(0,0,0,0.3)" : "none",
+          }}
+        >
+          <ArrowRight size={20} strokeWidth={2.2} />
+        </button>
       </div>
     </div>
   );
