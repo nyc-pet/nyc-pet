@@ -319,7 +319,7 @@ export default function MapPage() {
 
         {/* Selected pet card */}
         {selected && (
-          <div style={{ position: "absolute", bottom: 110, left: 16, right: 16, zIndex: 20, background: "white", borderRadius: 24, padding: 16, boxShadow: "0 8px 40px rgba(0,0,0,0.2)", display: "flex", gap: 14, alignItems: "center" }}>
+          <div style={{ position: "absolute", bottom: 110, left: 16, right: 16, zIndex: 1000, background: "white", borderRadius: 24, padding: 16, boxShadow: "0 8px 40px rgba(0,0,0,0.2)", display: "flex", gap: 14, alignItems: "center" }}>
             {selected.photo_url
               ? <img src={selected.photo_url} style={{ width: 72, height: 72, borderRadius: 16, objectFit: "cover", flexShrink: 0 }} />
               : <div style={{ width: 72, height: 72, borderRadius: 16, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0 }}>🐾</div>
