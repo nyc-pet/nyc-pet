@@ -38,6 +38,7 @@ interface Draft {
   tiktokEnabled:    boolean;
   twitter:          string;
   twitterEnabled:   boolean;
+  contactName:      string;
 }
 
 const BLANK: Draft = {
@@ -50,6 +51,7 @@ const BLANK: Draft = {
   instagram: "", instagramEnabled: false,
   tiktok: "", tiktokEnabled: false,
   twitter: "", twitterEnabled: false,
+  contactName: "",
 };
 
 const STEPS: StepKey[] = ["status","species","name","appearance","photos","location","contact","preview"];
@@ -96,6 +98,10 @@ export default function Report() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsLoggedIn(!!user);
       setAuthLoading(false);
+      if (user) {
+        const profileName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+        if (profileName) setDraft(d => ({ ...d, contactName: d.contactName || profileName }));
+      }
     });
   }, []);
 
@@ -214,11 +220,9 @@ export default function Report() {
       if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
     } catch {}
 
-    const contactName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0] || "Anonymous";
-
     const { data: inserted, error: insertError } = await supabase.from("pet_posts").insert({
       user_id:           user.id,
-      contact_name:      contactName,
+      contact_name:      draft.contactName.trim() || "Anonymous",
       status:            draft.status,
       species:           draft.species,
       name:              draft.name,
@@ -964,6 +968,19 @@ function ContactStep({ draft, setDraft }: { draft: Draft; setDraft: React.Dispat
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+      {/* Your Name */}
+      <div style={{ background:"#f8faff", borderRadius:20, padding:"16px 18px", border:"1.5px solid #e2e8f0" }}>
+        <p style={{ fontSize:13, fontWeight:700, color:"#111", marginBottom:8 }}>Your name</p>
+        <input
+          type="text"
+          placeholder="Anonymous"
+          value={draft.contactName}
+          onChange={e => setDraft(d => ({ ...d, contactName: e.target.value }))}
+          style={{ width:"100%", padding:"12px 14px", background:"#fff", borderRadius:12, fontSize:15, color:"#111", border:"1.5px solid #e2e8f0", outline:"none", boxSizing:"border-box" }}
+        />
+        <p style={{ fontSize:11, color:"#aaa", marginTop:6 }}>Shown on your post. Leave blank to stay anonymous.</p>
+      </div>
+
       {/* Privacy note */}
       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
         <Lock size={13} color="#aaa" strokeWidth={2} />
@@ -1047,6 +1064,7 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
       {/* Info rows */}
       <div style={{ background: "#fafafa", borderRadius: 18, overflow: "hidden", marginBottom: 20 }}>
         {[
+          { label: "Posted by", value: draft.contactName || "Anonymous", step: "contact" as StepKey },
           { label: "Color",    value: draft.color,    step: "appearance" as StepKey },
           { label: "Size",     value: draft.size,     step: "appearance" as StepKey },
           { label: "Borough",  value: draft.borough,  step: "location" as StepKey },
