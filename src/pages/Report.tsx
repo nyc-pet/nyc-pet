@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, Camera, MapPin, Navigation,
   Edit2, Pencil, SquarePen, CheckCircle, HeartCrack, Heart, X, Plus,
   Dog, Cat, Bird, Fish, Rabbit, HelpCircle, MessageCircle, Phone, Lock, Mail,
-  Share2, PartyPopper, RefreshCw,
+  Share2, PartyPopper, RefreshCw, Clock, Bell, Home,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
@@ -493,49 +493,59 @@ function AuthGate({ onNavigate }: { onNavigate: (path: string) => void }) {
 
 /* ─── Success Screen ─────────────────────────────────────── */
 function SuccessScreen({ draft, postId, onMap, onView }: { draft: Draft; postId: string | null; onMap: () => void; onView: () => void }) {
-  const isLost = draft.status === "lost";
-
-  async function share() {
-    const url = postId ? `${window.location.origin}/pet/${postId}` : window.location.origin;
-    const text = isLost
-      ? `Help find ${draft.name || "my pet"}! Lost ${draft.species?.toLowerCase()} in ${draft.location}. ${url}`
-      : `Found ${draft.name ? `a pet named ${draft.name}` : `a ${draft.species?.toLowerCase()}`} in ${draft.location}. ${url}`;
-    if (navigator.share) {
-      await navigator.share({ title: `${isLost ? "Lost" : "Found"} pet on nyc.pet`, text, url });
-    } else {
-      await navigator.clipboard.writeText(text);
-      alert("Link copied to clipboard!");
-    }
-  }
-
   return (
-    <div style={{ minHeight:"100dvh", background:"#fff", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", textAlign:"center" }}>
-      <style>{`@keyframes popIn { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }`}</style>
+    <div style={{ minHeight:"100dvh", background:"#fff", display:"flex", flexDirection:"column" }}>
+      <style>{`@keyframes popIn { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }`}</style>
 
-      {/* Animated icon */}
-      <div style={{ width:96, height:96, borderRadius:48, background:"#fffbeb", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:24, animation:"popIn 0.5s cubic-bezier(.4,0,.2,1) both" }}>
-        <PartyPopper size={44} color="#f59e0b" strokeWidth={1.5} />
-      </div>
-
-      <h1 style={{ fontSize:28, fontWeight:900, color:"#111", lineHeight:1.2, marginBottom:10 }}>
-        Report submitted!
-      </h1>
-      <p style={{ fontSize:15, color:"#666", lineHeight:1.7, maxWidth:300, marginBottom:12 }}>
-        {`Your report for ${draft.name || "this pet"} is under review. We'll notify you by email once it's approved and live.`}
-      </p>
-
-      {/* Pending badge */}
-      <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#fffbeb", border:"1.5px solid #fcd34d", borderRadius:30, padding:"8px 18px", marginBottom:36 }}>
-        <span style={{ fontSize:18 }}>⏳</span>
-        <span style={{ fontSize:13, fontWeight:700, color:"#b45309" }}>Pending approval</span>
-      </div>
-
-      <div style={{ width:"100%", display:"flex", flexDirection:"column", gap:12 }}>
-        <button onClick={onMap}
-          style={{ width:"100%", padding:"16px", background:"#111", color:"#fff", borderRadius:16, fontSize:15, fontWeight:700 }}>
-          Back to Home
+      {/* Header */}
+      <div style={{ padding:"52px 20px 0", display:"flex", alignItems:"center" }}>
+        <button onClick={onMap} style={{ width:40, height:40, borderRadius:20, background:"#f5f5f7", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <ArrowLeft size={18} color="#111" strokeWidth={2} />
         </button>
-        <p style={{ fontSize:12, color:"#bbb", textAlign:"center" }}>You'll get an email once your post goes live</p>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 28px 48px", textAlign:"center" }}>
+
+        {/* Icon */}
+        <div style={{ width:100, height:100, borderRadius:50, background:"#f0fff4", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:28, animation:"popIn 0.5s cubic-bezier(.4,0,.2,1) both" }}>
+          <CheckCircle size={48} color="#16a34a" strokeWidth={1.5} />
+        </div>
+
+        <h1 style={{ fontSize:28, fontWeight:900, color:"#111", lineHeight:1.2, marginBottom:12 }}>
+          Report submitted!
+        </h1>
+        <p style={{ fontSize:15, color:"#666", lineHeight:1.7, maxWidth:300, marginBottom:32 }}>
+          {`${draft.name || "Your pet"}'s report is under review by our team. You'll be notified in-app once it's approved and live.`}
+        </p>
+
+        {/* Status cards */}
+        <div style={{ width:"100%", display:"flex", flexDirection:"column", gap:10, marginBottom:36 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:14, padding:"14px 18px", background:"#fffbeb", borderRadius:16, border:"1px solid #fde68a" }}>
+            <div style={{ width:36, height:36, borderRadius:12, background:"#fef3c7", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <Clock size={18} color="#b45309" strokeWidth={1.8} />
+            </div>
+            <div style={{ textAlign:"left" }}>
+              <p style={{ fontSize:13, fontWeight:700, color:"#92400e" }}>Pending approval</p>
+              <p style={{ fontSize:12, color:"#b45309" }}>Usually reviewed within a few hours</p>
+            </div>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:14, padding:"14px 18px", background:"#f0f9ff", borderRadius:16, border:"1px solid #bae6fd" }}>
+            <div style={{ width:36, height:36, borderRadius:12, background:"#e0f2fe", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <Bell size={18} color="#0369a1" strokeWidth={1.8} />
+            </div>
+            <div style={{ textAlign:"left" }}>
+              <p style={{ fontSize:13, fontWeight:700, color:"#0c4a6e" }}>You'll be notified</p>
+              <p style={{ fontSize:12, color:"#0369a1" }}>Check the bell icon when your post goes live</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action */}
+        <button onClick={onMap}
+          style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"center", gap:10, padding:"16px", background:"#111", color:"#fff", borderRadius:16, fontSize:15, fontWeight:700, border:"none", cursor:"pointer" }}>
+          <Home size={18} strokeWidth={2} /> Back to Home
+        </button>
       </div>
     </div>
   );
