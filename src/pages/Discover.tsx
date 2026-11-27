@@ -180,7 +180,7 @@ export default function Discover() {
                   <p style={{ fontSize: 17, fontWeight: 800, color: "#000" }}>All Reports</p>
                   <span style={{ fontSize: 13, fontWeight: 600, color: "var(--gray-4)" }}>See All</span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 100 }}>
                   {rest.map(p => <ListCard key={p.id} post={p} onClick={() => navigate(`/pet/${p.id}`)} userLat={userLat} userLng={userLng} />)}
                 </div>
               </>
