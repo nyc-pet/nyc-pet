@@ -945,7 +945,7 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
     <div style={{ paddingTop: 4 }}>
 
       {/* Hero photo */}
-      <div style={{ height: 220, borderRadius: 20, overflow: "hidden", background: "#f0f4f8", position: "relative", marginBottom: 20 }}>
+      <div onClick={() => jumpTo("photos")} style={{ height: 220, borderRadius: 20, overflow: "hidden", background: "#f0f4f8", position: "relative", marginBottom: 20, cursor: "pointer" }}>
         {heroPhoto
           ? <img src={heroPhoto} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -954,6 +954,11 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
         }
         <div style={{ position: "absolute", top: 12, left: 12, background: draft.status === "lost" ? "#dc2626" : "#16a34a", padding: "5px 14px", borderRadius: 30 }}>
           <span style={{ fontSize: 12, fontWeight: 800, color: "#fff", textTransform: "uppercase", letterSpacing: 1 }}>{draft.status}</span>
+        </div>
+        {/* Edit overlay */}
+        <div style={{ position: "absolute", top: 12, right: 12, background: "rgba(0,0,0,0.5)", borderRadius: 10, padding: "6px 10px", display: "flex", alignItems: "center", gap: 5 }}>
+          <Pencil size={12} color="#fff" strokeWidth={2} />
+          <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Edit Photos</span>
         </div>
         {/* Extra photos strip */}
         {draft.previews.filter(Boolean).length > 1 && (
