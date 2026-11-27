@@ -43,6 +43,7 @@ export default function MapPage() {
   const [searchCenter, setSearchCenter] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<"all" | "lost" | "found">("all");
   const tileLayer = useRef<L.TileLayer | null>(null);
   const { setIsDark, setMenuOpen } = useTheme();
 
@@ -116,14 +117,15 @@ export default function MapPage() {
     const filtered = posts.filter(p => {
       const textMatch = !search || /^\d{5}$/.test(search.trim()) || `${p.name} ${p.species} ${p.last_seen_address}`.toLowerCase().includes(search.toLowerCase());
       const radiusMatch = !radius || !searchCenter || !p.lat || !p.lng ? true : haversine(searchCenter[0], searchCenter[1], p.lat, p.lng) <= radius;
-      return textMatch && radiusMatch;
+      const statusMatch = statusFilter === "all" || p.status === statusFilter;
+      return textMatch && radiusMatch && statusMatch;
     });
     filtered.forEach(post => {
       if (!post.lat || !post.lng) return;
       L.marker([post.lat, post.lng], { icon: makePinIcon(post.status === "lost" ? "#ff3b30" : "#34c759") })
         .addTo(map).on("click", () => setSelected(post));
     });
-  }, [posts, search, radius, searchCenter, mapReady]);
+  }, [posts, search, radius, searchCenter, mapReady, statusFilter]);
 
   async function handleSearch(value: string) {
     setSearch(value);
@@ -285,17 +287,24 @@ export default function MapPage() {
           </button>
         </div>
 
-        {/* Lost / Found pills — top right of map */}
+        {/* Status filter toggles — top right of map */}
         <div style={{ position: "absolute", top: 16, right: 16, zIndex: 10, display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
-          <div style={{ display: "flex", gap: 8 }}>
-            <div style={{ padding: "7px 14px", borderRadius: 20, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff3b30", display: "inline-block" }} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{posts.filter(p => p.status === "lost").length} Lost</span>
-            </div>
-            <div style={{ padding: "7px 14px", borderRadius: 20, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#34c759", display: "inline-block" }} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{posts.filter(p => p.status === "found").length} Found</span>
-            </div>
+          <div style={{ display: "flex", gap: 6, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", borderRadius: 24, padding: 4, boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
+            {([
+              { key: "all",   label: "All",   dot: null },
+              { key: "lost",  label: "Lost",  dot: "#ff3b30" },
+              { key: "found", label: "Found", dot: "#34c759" },
+            ] as { key: "all"|"lost"|"found"; label: string; dot: string|null }[]).map(({ key, label, dot }) => (
+              <button key={key} onClick={() => setStatusFilter(key)}
+                style={{ padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 5, transition: "all 0.2s",
+                  background: statusFilter === key ? "#111" : "transparent",
+                  color: statusFilter === key ? "#fff" : "#555",
+                }}>
+                {dot && <span style={{ width: 7, height: 7, borderRadius: "50%", background: dot, display: "inline-block", flexShrink: 0 }} />}
+                {label}
+                {key !== "all" && <span style={{ fontSize: 10, opacity: 0.75 }}>({posts.filter(p => p.status === key).length})</span>}
+              </button>
+            ))}
           </div>
 
           {/* Area name + radius pill */}
