@@ -23,6 +23,7 @@ interface Draft {
   photos:   (File | null)[];
   previews: (string | null)[];
   location:        string;
+  date:            string;
   notes:           string;
   phone:           string;
   phoneEnabled:    boolean;
@@ -41,7 +42,7 @@ interface Draft {
 const BLANK: Draft = {
   status: null, species: null, name: "", breed: "", color: "",
   size: null, photos: [null,null,null,null], previews: [null,null,null,null],
-  location: "", notes: "",
+  location: "", date: new Date().toISOString().split("T")[0], notes: "",
   phone: "", phoneEnabled: false,
   email: "", emailEnabled: false,
   facebook: "", facebookEnabled: false,
@@ -216,7 +217,7 @@ export default function Report() {
       color:             draft.color || null,
       description:       draft.notes || null,
       last_seen_address: draft.location,
-      last_seen_date:    new Date().toISOString().split("T")[0],
+      last_seen_date:    draft.date || new Date().toISOString().split("T")[0],
       lat,
       lng,
       photo_url:         urls[0],
@@ -711,7 +712,8 @@ function PhotosStep({ draft, pickPhoto, removePhoto }: { draft: Draft; pickPhoto
 /* ─── Step: Location ────────────────────────────────────── */
 function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>>; getLocation: () => void }) {
   return (
-    <div style={{ paddingTop:16 }}>
+    <div style={{ paddingTop:16, display:"flex", flexDirection:"column", gap:16 }}>
+      {/* Location input */}
       <div style={{ position:"relative" }}>
         <MapPin size={18} color="#aaa" style={{ position:"absolute", left:16, top:"50%", transform:"translateY(-50%)" }} />
         <input
@@ -726,7 +728,20 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
           <Navigation size={16} color="#fff" strokeWidth={2} />
         </button>
       </div>
-      <p style={{ fontSize:13, color:"#aaa", marginTop:12, lineHeight:1.6 }}>
+
+      {/* Date picker */}
+      <div>
+        <p style={{ fontSize:13, fontWeight:700, color:"#555", marginBottom:8 }}>📅 Last seen date</p>
+        <input
+          type="date"
+          value={draft.date}
+          max={new Date().toISOString().split("T")[0]}
+          onChange={e => setDraft(d => ({ ...d, date: e.target.value }))}
+          style={{ width:"100%", padding:"14px 16px", background:"#f5f5f7", borderRadius:16, fontSize:15, color:"#111", border:"none", outline:"none", boxSizing:"border-box" }}
+        />
+      </div>
+
+      <p style={{ fontSize:13, color:"#aaa", lineHeight:1.6 }}>
         Tap the GPS button to use your current location, or type a neighborhood or cross-street.
       </p>
     </div>
