@@ -93,9 +93,11 @@ export default function Discover() {
   const rest = filtered.slice(1);
 
   return (
-    <div className="page" style={{ background: "var(--bg)" }}>
+    <div className="page" style={{ background: "var(--bg)", display: "flex", flexDirection: "column", height: "100dvh", overflow: "hidden" }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      {/* Header */}
+
+      {/* Sticky header + search/filter */}
+      <div style={{ flexShrink: 0, background: "var(--white)" }}>
       <AppHeader />
 
       <div style={{ padding: "0 20px", background: "var(--white)" }}>
@@ -152,9 +154,10 @@ export default function Discover() {
           <span style={{ marginLeft: "auto", fontSize: 13, fontWeight: 600, color: "var(--gray-4)", alignSelf: "center" }}>See All</span>
         </div>
       </div>
+      </div>{/* end sticky header */}
 
-      {/* Content */}
-      <div style={{ padding: "20px 20px 0" }}>
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px 20px 0" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "60px 0", color: "var(--gray-4)" }}>Loading…</div>
         ) : filtered.length === 0 ? (
