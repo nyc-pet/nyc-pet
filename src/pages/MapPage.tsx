@@ -356,9 +356,9 @@ export default function MapPage() {
         @keyframes ping { 0% { transform:translate(-50%,-50%) scale(1); opacity:0.4; } 100% { transform:translate(-50%,-50%) scale(2.5); opacity:0; } }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
         @keyframes slideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
-        .leaflet-top.leaflet-left { top: 35% !important; left: 16px !important; z-index: 1000 !important; }
-        .leaflet-control-zoom { border-radius: 18px !important; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important; border: none !important; }
-        .leaflet-control-zoom a { width: 34px !important; height: 34px !important; line-height: 34px !important; font-size: 18px !important; color: #1c314e !important; background: #fff !important; border: none !important; }
+        .leaflet-top.leaflet-left { top: 20% !important; left: 16px !important; z-index: 1000 !important; }
+        .leaflet-control-zoom { border-radius: 10px !important; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important; border: none !important; }
+        .leaflet-control-zoom a { width: 36px !important; height: 36px !important; line-height: 36px !important; font-size: 18px !important; color: #1c314e !important; background: #fff !important; border: none !important; }
         .leaflet-control-zoom-in { border-bottom: 1px solid #eee !important; }
       `}</style>
     </div>
