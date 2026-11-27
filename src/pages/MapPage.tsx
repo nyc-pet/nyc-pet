@@ -220,7 +220,7 @@ export default function MapPage() {
           {/* Radius dropdown */}
           {showRadiusMenu && (
             <div style={{
-              position: "absolute", top: 56, right: 0, zIndex: 100,
+              position: "absolute", top: 56, right: 0, zIndex: 1500,
               background: "#fff", borderRadius: 20, padding: "8px 0",
               boxShadow: "0 8px 40px rgba(0,0,0,0.18)", minWidth: 180,
             }}>
@@ -248,7 +248,7 @@ export default function MapPage() {
 
       {/* Tap-outside backdrop to close radius menu */}
       {showRadiusMenu && (
-        <div onClick={() => setShowRadiusMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 50 }} />
+        <div onClick={() => setShowRadiusMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 1400 }} />
       )}
 
       {/* ── Map container with rounded left & right edges ── */}
