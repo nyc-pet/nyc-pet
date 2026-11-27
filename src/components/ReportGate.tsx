@@ -85,7 +85,7 @@ export default function ReportGate({ onClose }: Props) {
         color: "white",
         textAlign: "center",
         containerType: "inline-size",
-        paddingBottom: "calc(72px + env(safe-area-inset-bottom, 20px))",
+        paddingBottom: 0,
       }}>
 
         {/* Content */}
