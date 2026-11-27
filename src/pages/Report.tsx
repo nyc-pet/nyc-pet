@@ -4,8 +4,19 @@ import {
   ArrowLeft, ArrowRight, Camera, MapPin, Navigation,
   Edit2, Pencil, SquarePen, CheckCircle, HeartCrack, Heart, X, Plus,
   Dog, Cat, Bird, Fish, Rabbit, HelpCircle, MessageCircle, Phone, Lock, Mail,
-  Share2, PartyPopper, RefreshCw, Clock, Bell, Home,
+  Share2, PartyPopper, RefreshCw, Clock, Bell, Home, Map as MapIcon, Keyboard,
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix Leaflet default marker icon
+const markerIcon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
+});
 import { supabase } from "../lib/supabase";
 
 /* ─── Types ─────────────────────────────────────────────── */
@@ -39,6 +50,8 @@ interface Draft {
   twitter:          string;
   twitterEnabled:   boolean;
   contactName:      string;
+  lat:              number | null;
+  lng:              number | null;
 }
 
 const BLANK: Draft = {
@@ -52,6 +65,7 @@ const BLANK: Draft = {
   tiktok: "", tiktokEnabled: false,
   twitter: "", twitterEnabled: false,
   contactName: "",
+  lat: null, lng: null,
 };
 
 const STEPS: StepKey[] = ["status","species","name","appearance","photos","location","contact","preview"];
@@ -187,9 +201,9 @@ export default function Report() {
         const data = await res.json();
         const addr = data.address;
         const loc  = [addr.neighbourhood || addr.suburb, addr.city || addr.town || addr.village].filter(Boolean).join(", ");
-        setDraft(d => ({ ...d, location: loc || `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+        setDraft(d => ({ ...d, location: loc || `${lat.toFixed(4)}, ${lng.toFixed(4)}`, lat, lng }));
       } catch {
-        setDraft(d => ({ ...d, location: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+        setDraft(d => ({ ...d, location: `${lat.toFixed(4)}, ${lng.toFixed(4)}`, lat, lng }));
       }
     });
   }
@@ -212,13 +226,16 @@ export default function Report() {
       }
     }
 
-    // Geocode location → lat/lng
-    let lat = 40.7128, lng = -74.0060;
-    try {
-      const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(draft.location + ", New York")}&format=json&limit=1`);
-      const geoData = await geo.json();
-      if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
-    } catch {}
+    // Use pinned lat/lng from map picker or GPS; fall back to geocoding the address
+    let lat = draft.lat ?? 40.7128;
+    let lng = draft.lng ?? -74.0060;
+    if (!draft.lat || !draft.lng) {
+      try {
+        const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(draft.location + ", New York")}&format=json&limit=1`);
+        const geoData = await geo.json();
+        if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
+      } catch {}
+    }
 
     const { data: inserted, error: insertError } = await supabase.from("pet_posts").insert({
       user_id:           user.id,
@@ -749,24 +766,95 @@ function PhotosStep({ draft, pickPhoto, removePhoto }: { draft: Draft; pickPhoto
 }
 
 /* ─── Step: Location ────────────────────────────────────── */
+/* ── Map click handler (must live inside MapContainer) ── */
+function MapClickHandler({ onPick }: { onPick: (lat: number, lng: number) => void }) {
+  useMapEvents({ click: e => onPick(e.latlng.lat, e.latlng.lng) });
+  return null;
+}
+
 function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>>; getLocation: () => void }) {
+  const [mapMode, setMapMode] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
+
+  async function handleMapPick(lat: number, lng: number) {
+    setGeocoding(true);
+    setDraft(d => ({ ...d, lat, lng }));
+    try {
+      const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const data = await res.json();
+      const addr = data.address;
+      const loc  = [addr.road, addr.neighbourhood || addr.suburb, addr.city || addr.town || addr.village].filter(Boolean).join(", ");
+      // Auto-detect NYC borough
+      const boroughMap: Record<string, string> = {
+        "Manhattan": "Manhattan", "Brooklyn": "Brooklyn", "Queens": "Queens",
+        "The Bronx": "The Bronx", "Bronx": "The Bronx", "Staten Island": "Staten Island",
+      };
+      const detectedBorough = Object.keys(boroughMap).find(k =>
+        (addr.county || addr.city_district || addr.suburb || "").includes(k)
+      );
+      setDraft(d => ({
+        ...d, lat, lng,
+        location: loc || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+        borough: detectedBorough ? boroughMap[detectedBorough] : d.borough,
+      }));
+    } catch {
+      setDraft(d => ({ ...d, location: `${lat.toFixed(5)}, ${lng.toFixed(5)}` }));
+    }
+    setGeocoding(false);
+  }
+
+  const center: [number, number] = draft.lat && draft.lng
+    ? [draft.lat, draft.lng]
+    : [40.7128, -74.0060]; // NYC default
+
   return (
     <div style={{ paddingTop:16, display:"flex", flexDirection:"column", gap:16 }}>
-      {/* Location input */}
-      <div style={{ position:"relative" }}>
-        <MapPin size={18} color="#aaa" style={{ position:"absolute", left:16, top:"50%", transform:"translateY(-50%)" }} />
-        <input
-          autoFocus
-          type="text"
-          value={draft.location}
-          onChange={e => setDraft(d => ({ ...d, location: e.target.value }))}
-          placeholder="Neighborhood, street, or landmark…"
-          style={{ width:"100%", padding:"16px 52px 16px 46px", background:"#f5f5f7", borderRadius:16, fontSize:15, color:"#111", border:"none", outline:"none" }}
-        />
-        <button onClick={getLocation} style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", width:36, height:36, borderRadius:12, background:"#111", display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <Navigation size={16} color="#fff" strokeWidth={2} />
+      {/* Mode toggle */}
+      <div style={{ display:"flex", background:"#f0f0f0", borderRadius:14, padding:4, gap:4 }}>
+        <button onClick={() => setMapMode(false)}
+          style={{ flex:1, padding:"9px", borderRadius:10, border:"none", cursor:"pointer", fontWeight:600, fontSize:13, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background: !mapMode ? "#fff" : "transparent", color: !mapMode ? "#111" : "#888", boxShadow: !mapMode ? "0 1px 4px rgba(0,0,0,0.1)" : "none", transition:"all 0.2s" }}>
+          <Keyboard size={14} /> Type address
+        </button>
+        <button onClick={() => setMapMode(true)}
+          style={{ flex:1, padding:"9px", borderRadius:10, border:"none", cursor:"pointer", fontWeight:600, fontSize:13, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background: mapMode ? "#fff" : "transparent", color: mapMode ? "#111" : "#888", boxShadow: mapMode ? "0 1px 4px rgba(0,0,0,0.1)" : "none", transition:"all 0.2s" }}>
+          <MapIcon size={14} /> Pick on map
         </button>
       </div>
+
+      {mapMode ? (
+        /* ── Map picker ── */
+        <div style={{ borderRadius:16, overflow:"hidden", border:"1.5px solid #e5e7eb" }}>
+          <MapContainer center={center} zoom={13} style={{ height:280, width:"100%" }} zoomControl={false}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="" />
+            <MapClickHandler onPick={handleMapPick} />
+            {draft.lat && draft.lng && <Marker position={[draft.lat, draft.lng]} icon={markerIcon} />}
+          </MapContainer>
+          <div style={{ padding:"10px 14px", background:"#f8faff", display:"flex", alignItems:"center", gap:8 }}>
+            {geocoding
+              ? <><RefreshCw size={13} color="#aaa" style={{ animation:"spin 1s linear infinite" }} /><span style={{ fontSize:12, color:"#aaa" }}>Getting address…</span></>
+              : draft.location
+                ? <><MapPin size={13} color="#16a34a" /><span style={{ fontSize:12, color:"#444", flex:1 }}>{draft.location}</span></>
+                : <span style={{ fontSize:12, color:"#aaa" }}>Tap anywhere on the map to drop a pin</span>
+            }
+          </div>
+        </div>
+      ) : (
+        /* ── Text input ── */
+        <div style={{ position:"relative" }}>
+          <MapPin size={18} color="#aaa" style={{ position:"absolute", left:16, top:"50%", transform:"translateY(-50%)" }} />
+          <input
+            autoFocus
+            type="text"
+            value={draft.location}
+            onChange={e => setDraft(d => ({ ...d, location: e.target.value, lat: null, lng: null }))}
+            placeholder="Neighborhood, street, or landmark…"
+            style={{ width:"100%", padding:"16px 52px 16px 46px", background:"#f5f5f7", borderRadius:16, fontSize:15, color:"#111", border:"none", outline:"none" }}
+          />
+          <button onClick={getLocation} style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", width:36, height:36, borderRadius:12, background:"#111", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <Navigation size={16} color="#fff" strokeWidth={2} />
+          </button>
+        </div>
+      )}
 
       {/* Borough picker */}
       {(() => {
@@ -820,8 +908,9 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
         />
       </div>
 
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <p style={{ fontSize:13, color:"#aaa", lineHeight:1.6 }}>
-        Tap the GPS button to use your current location, or type a neighborhood or cross-street.
+        {mapMode ? "Tap the map to drop a pin exactly where the pet was last seen." : "Type an address, or tap the GPS button to use your current location."}
       </p>
     </div>
   );
