@@ -1,0 +1,1005 @@
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft, ArrowRight, Camera, MapPin, Navigation,
+  Edit2, Pencil, CheckCircle, HeartCrack, Heart, X, Plus,
+  Dog, Cat, Bird, Fish, Rabbit, HelpCircle, MessageCircle, Phone, Lock, Mail,
+  Share2, PartyPopper, RefreshCw,
+} from "lucide-react";
+import { supabase } from "../lib/supabase";
+
+/* ─── Types ─────────────────────────────────────────────── */
+type Status  = "lost" | "found";
+type SizeOpt = "Tiny" | "Small" | "Medium" | "Large";
+type StepKey = "status" | "species" | "name" | "appearance" | "photos" | "location" | "contact" | "preview";
+
+interface Draft {
+  status:   Status | null;
+  species:  string | null;
+  name:     string;
+  breed:    string;
+  color:    string;
+  size:     SizeOpt | null;
+  photos:   (File | null)[];
+  previews: (string | null)[];
+  location:        string;
+  notes:           string;
+  phone:           string;
+  phoneEnabled:    boolean;
+  email:           string;
+  emailEnabled:    boolean;
+  facebook:         string;
+  facebookEnabled:  boolean;
+  instagram:        string;
+  instagramEnabled: boolean;
+  tiktok:           string;
+  tiktokEnabled:    boolean;
+  twitter:          string;
+  twitterEnabled:   boolean;
+}
+
+const BLANK: Draft = {
+  status: null, species: null, name: "", breed: "", color: "",
+  size: null, photos: [null,null,null,null], previews: [null,null,null,null],
+  location: "", notes: "",
+  phone: "", phoneEnabled: false,
+  email: "", emailEnabled: false,
+  facebook: "", facebookEnabled: false,
+  instagram: "", instagramEnabled: false,
+  tiktok: "", tiktokEnabled: false,
+  twitter: "", twitterEnabled: false,
+};
+
+const STEPS: StepKey[] = ["status","species","name","appearance","photos","location","contact","preview"];
+
+const SPECIES_LIST = [
+  { label: "Dog",    Icon: Dog,         bg: "#fef3c7", accent: "#f59e0b" },
+  { label: "Cat",    Icon: Cat,         bg: "#f0fff4", accent: "#34c759" },
+  { label: "Bird",   Icon: Bird,        bg: "#f0f7ff", accent: "#1c314e" },
+  { label: "Rabbit", Icon: Rabbit,      bg: "#fdf4ff", accent: "#a855f7" },
+  { label: "Fish",   Icon: Fish,        bg: "#ecfeff", accent: "#06b6d4" },
+  { label: "Other",  Icon: HelpCircle,  bg: "#f8faff", accent: "#64748b" },
+];
+
+const COLORS = ["Black","White","Brown","Golden","Gray","Orange","Cream","Multi"];
+const SIZES: SizeOpt[] = ["Tiny","Small","Medium","Large"];
+
+/* ─── Component ─────────────────────────────────────────── */
+export default function Report() {
+  const navigate = useNavigate();
+  const fileRef  = useRef<HTMLInputElement>(null);
+  const slotRef  = useRef<number>(0);
+
+  const [draft, setDraft]           = useState<Draft>(BLANK);
+  const [stepIdx, setStepIdx]       = useState(0);
+  const [animKey, setAnimKey]       = useState(0);
+  const [direction, setDirection]   = useState<"fwd"|"bwd">("fwd");
+  const [submitting, setSubmitting] = useState(false);
+  const [editTarget, setEditTarget] = useState<StepKey | null>(null);
+
+  // Auth
+  const [authLoading, setAuthLoading]   = useState(true);
+  const [isLoggedIn, setIsLoggedIn]     = useState(false);
+
+  // Draft persistence
+  const [showResumeBanner, setShowResumeBanner] = useState(false);
+
+  // Success
+  const [submitted, setSubmitted]           = useState(false);
+  const [submittedDraft, setSubmittedDraft] = useState<Draft | null>(null);
+  const [submittedPostId, setSubmittedPostId] = useState<string | null>(null);
+
+  /* ── Auth check ── */
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+      setAuthLoading(false);
+    });
+  }, []);
+
+  /* ── Restore draft from localStorage (after auth confirmed) ── */
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    try {
+      const saved = localStorage.getItem("nyc-pet-draft");
+      if (!saved) return;
+      const { _step, ...savedDraft } = JSON.parse(saved);
+      if (savedDraft.status || savedDraft.name) {
+        setDraft(d => ({ ...d, ...savedDraft }));
+        if (_step) setStepIdx(_step);
+        setShowResumeBanner(true);
+        setTimeout(() => setShowResumeBanner(false), 4000);
+      }
+    } catch {}
+  }, [isLoggedIn]);
+
+  /* ── Save draft to localStorage on every change ── */
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const { photos, previews, ...saveable } = draft;
+    localStorage.setItem("nyc-pet-draft", JSON.stringify({ ...saveable, _step: stepIdx }));
+  }, [draft, stepIdx, isLoggedIn]);
+
+  const step = STEPS[stepIdx];
+
+  function go(delta: number) {
+    setDirection(delta > 0 ? "fwd" : "bwd");
+    setAnimKey(k => k + 1);
+    setStepIdx(i => Math.max(0, Math.min(STEPS.length - 1, i + delta)));
+  }
+
+  function jumpTo(s: StepKey) {
+    const idx = STEPS.indexOf(s);
+    setDirection(idx < stepIdx ? "bwd" : "fwd");
+    setAnimKey(k => k + 1);
+    setStepIdx(idx);
+    setEditTarget(null);
+  }
+
+  function pickPhoto(slot: number) {
+    slotRef.current = slot;
+    fileRef.current?.click();
+  }
+
+  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const slot = slotRef.current;
+    setDraft(d => {
+      const photos   = [...d.photos];
+      const previews = [...d.previews];
+      photos[slot]   = file;
+      previews[slot] = url;
+      return { ...d, photos, previews };
+    });
+    e.target.value = "";
+  }
+
+  function removePhoto(slot: number) {
+    setDraft(d => {
+      const photos   = [...d.photos];
+      const previews = [...d.previews];
+      photos[slot]   = null;
+      previews[slot] = null;
+      return { ...d, photos, previews };
+    });
+  }
+
+  async function getLocation() {
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      try {
+        const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+        const data = await res.json();
+        const addr = data.address;
+        const loc  = [addr.neighbourhood || addr.suburb, addr.city || addr.town || addr.village].filter(Boolean).join(", ");
+        setDraft(d => ({ ...d, location: loc || `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+      } catch {
+        setDraft(d => ({ ...d, location: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+      }
+    });
+  }
+
+  async function submit() {
+    setSubmitting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { navigate("/login"); return; }
+
+    // Upload photos
+    const urls: (string|null)[] = [null,null,null,null];
+    for (let i = 0; i < 4; i++) {
+      const file = draft.photos[i];
+      if (!file) continue;
+      const path = `${user.id}/${Date.now()}_${i}.${file.name.split(".").pop()}`;
+      const { error } = await supabase.storage.from("pet-photos").upload(path, file);
+      if (!error) {
+        const { data } = supabase.storage.from("pet-photos").getPublicUrl(path);
+        urls[i] = data.publicUrl;
+      }
+    }
+
+    // Geocode location → lat/lng
+    let lat = 40.7128, lng = -74.0060;
+    try {
+      const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(draft.location + ", New York")}&format=json&limit=1`);
+      const geoData = await geo.json();
+      if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
+    } catch {}
+
+    const { data: inserted } = await supabase.from("pet_posts").insert({
+      user_id:           user.id,
+      status:            draft.status,
+      species:           draft.species,
+      name:              draft.name,
+      breed:             draft.breed || null,
+      color:             draft.color || null,
+      description:       draft.notes || null,
+      last_seen_address: draft.location,
+      lat,
+      lng,
+      photo_url:         urls[0],
+      photo_url_2:       urls[1],
+      photo_url_3:       urls[2],
+      photo_url_4:       urls[3],
+    }).select("id").single();
+
+    // Clear saved draft
+    localStorage.removeItem("nyc-pet-draft");
+
+    setSubmitting(false);
+    setSubmittedDraft({ ...draft });
+    setSubmittedPostId(inserted?.id ?? null);
+    setSubmitted(true);
+  }
+
+  /* ── step validation ── */
+  function canContinue(): boolean {
+    if (step === "status")     return !!draft.status;
+    if (step === "species")    return !!draft.species;
+    if (step === "name")       return draft.name.trim().length > 0;
+    if (step === "appearance") return true; // optional
+    if (step === "photos")     return true; // optional
+    if (step === "location")   return draft.location.trim().length > 0;
+    return true;
+  }
+
+  /* ── hero gradient per step ── */
+  const heroGrad: Record<StepKey, string> = {
+    status:     "linear-gradient(160deg,#1c1c1e 0%,#2c2c2e 100%)",
+    species:    "linear-gradient(160deg,#1a3a2a 0%,#2d6a4f 100%)",
+    name:       "linear-gradient(160deg,#1c314e 0%,#2d4f78 100%)",
+    appearance: "linear-gradient(160deg,#3d1a4e 0%,#6b2d8a 100%)",
+    photos:     "linear-gradient(160deg,#1a1a2e 0%,#16213e 100%)",
+    location:   "linear-gradient(160deg,#0f3460 0%,#1a4a7a 100%)",
+    contact:    "linear-gradient(160deg,#1a1a1a 0%,#2d2d2d 100%)",
+    preview:    "linear-gradient(160deg,#111 0%,#333 100%)",
+  };
+
+  const heroTitle: Record<StepKey, string> = {
+    status:     draft.status === "found" ? "You found a pet!" : "Lost a pet?",
+    species:    "What kind of pet?",
+    name:       `What's your ${draft.species?.toLowerCase() || "pet"}'s name?`,
+    appearance: `Describe ${draft.name || "your pet"}`,
+    photos:     `Add photos of ${draft.name || "your pet"}`,
+    location:   draft.status === "lost" ? `Where was ${draft.name || "your pet"} last seen?` : `Where did you find ${draft.name || "this pet"}?`,
+    contact:    "How can people reach you?",
+    preview:    "Review your report",
+  };
+
+  const heroSub: Record<StepKey, string> = {
+    status:     "Tell us what happened",
+    species:    "Select the animal type",
+    name:       "What do they respond to?",
+    appearance: "Help people recognize them",
+    photos:     "Clear photos increase chances",
+    location:   "Be as specific as possible",
+    contact:    "Your info is always kept private",
+    preview:    "Make sure everything looks right",
+  };
+
+  /* ─── Early returns ────────────────────────────────────── */
+  if (authLoading) return (
+    <div style={{ minHeight:"100dvh", display:"flex", alignItems:"center", justifyContent:"center", background:"#fff" }}>
+      <div style={{ width:40, height:40, borderRadius:20, border:"3px solid #f0f0f0", borderTopColor:"#111", animation:"spin 0.8s linear infinite" }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+
+  if (!isLoggedIn) return <AuthGate onNavigate={navigate} />;
+
+  if (submitted && submittedDraft) return (
+    <SuccessScreen draft={submittedDraft} postId={submittedPostId} onMap={() => navigate("/")} onView={() => submittedPostId ? navigate(`/pet/${submittedPostId}`) : navigate("/")} />
+  );
+
+  /* ─── Render ───────────────────────────────────────────── */
+  return (
+    <div style={{ position: "relative", minHeight: "100dvh", overflow: "hidden", background: "#f8faff" }}>
+      <style>{`
+        @keyframes slideFwd {
+          from { opacity: 0; transform: translateX(32px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideBwd {
+          from { opacity: 0; transform: translateX(-32px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .step-enter-fwd { animation: slideFwd 0.28s cubic-bezier(.4,0,.2,1) both; }
+        .step-enter-bwd { animation: slideBwd 0.28s cubic-bezier(.4,0,.2,1) both; }
+      `}</style>
+
+      {/* Hidden file input */}
+      <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={onFile} />
+
+      {/* Hero header */}
+      <div style={{ background: heroGrad[step], position: "relative", display:"flex", flexDirection:"column", justifyContent:"flex-end", minHeight: (step === "species" || step === "name") ? 280 : 220, paddingBottom: 44 }}>
+
+        {/* Back button */}
+        <button onClick={() => stepIdx === 0 ? navigate("/") : go(-1)}
+          style={{ position:"absolute", top:52, left:20, width:38, height:38, borderRadius:19, background:"rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center", border:"none", cursor:"pointer" }}>
+          <ArrowLeft size={18} color="#fff" />
+        </button>
+
+        {/* Close × — goes home */}
+        <button onClick={() => navigate("/")}
+          style={{ position:"absolute", top:52, right:20, width:38, height:38, borderRadius:19, background:"rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center", border:"none", cursor:"pointer" }}>
+          <X size={18} color="#fff" />
+        </button>
+
+        {/* Arch SVG at bottom of hero — merges into content area */}
+        <svg
+          style={{ position:"absolute", bottom:-1, left:0, width:"100%", display:"block" }}
+          viewBox="0 0 390 34" preserveAspectRatio="none" aria-hidden="true"
+        >
+          <path fill="#fff" d="M0 34 C0 15 15 0 34 0 H136 C159 0 175 28 195 28 C215 28 231 0 254 0 H356 C375 0 390 15 390 34 Z"/>
+        </svg>
+
+        {/* Step dots */}
+        <div style={{ display:"flex", justifyContent:"center", gap:6, marginBottom:16 }}>
+          {STEPS.slice(0,-1).map((_,i) => (
+            <div key={i} style={{ width: i === stepIdx ? 20 : 6, height:6, borderRadius:3, background: i <= stepIdx ? "#fff" : "rgba(255,255,255,0.3)", transition:"all 0.3s" }} />
+          ))}
+        </div>
+
+        <p style={{ fontSize:12, fontWeight:700, color:"rgba(255,255,255,0.6)", textTransform:"uppercase", letterSpacing:1.5, marginBottom:8, textAlign:"center" }}>
+          {step === "preview" ? "Almost done" : `Step ${stepIdx + 1} of ${STEPS.length - 1}`}
+        </p>
+        <h1 style={{ fontSize:28, fontWeight:800, color:"#fff", textAlign:"center", lineHeight:1.2 }}>{heroTitle[step]}</h1>
+        <p style={{ fontSize:14, color:"rgba(255,255,255,0.65)", textAlign:"center", marginTop:8 }}>{heroSub[step]}</p>
+      </div>
+
+      {/* White sheet */}
+      <div style={{ background:"#fff", borderRadius:0, marginTop:-1, minHeight:"calc(100dvh - 180px)", position:"relative", zIndex:1 }}>
+        <div style={{ display:"flex", justifyContent:"center", paddingTop:12, marginBottom:4 }}>
+          <div style={{ width:36, height:4, borderRadius:2, background:"#e2e8f0" }} />
+        </div>
+
+        {/* Draft restored banner */}
+        {showResumeBanner && (
+          <div style={{ margin:"0 24px 4px", background:"#f0fff4", borderRadius:14, padding:"11px 16px", display:"flex", alignItems:"center", gap:10 }}>
+            <RefreshCw size={14} color="#16a34a" strokeWidth={2} />
+            <p style={{ fontSize:13, fontWeight:600, color:"#16a34a" }}>Draft restored — pick up where you left off</p>
+          </div>
+        )}
+
+        {/* Animated step content */}
+        <div key={animKey} className={direction === "fwd" ? "step-enter-fwd" : "step-enter-bwd"}
+          style={{ padding:"20px 24px 120px", minHeight:"calc(100dvh - 260px)", display:"flex", flexDirection:"column", justifyContent: (step === "name" || step === "location" || step === "species" || step === "contact") ? "center" : "flex-start" }}>
+          {step === "status"     && <StatusStep     draft={draft} setDraft={setDraft} onSelect={() => go(1)} />}
+          {step === "species"    && <SpeciesStep    draft={draft} setDraft={setDraft} onSelect={() => go(1)} />}
+          {step === "name"       && <NameStep       draft={draft} setDraft={setDraft} />}
+          {step === "appearance" && <AppearanceStep draft={draft} setDraft={setDraft} />}
+          {step === "photos"     && <PhotosStep     draft={draft} pickPhoto={pickPhoto} removePhoto={removePhoto} />}
+          {step === "location"   && <LocationStep   draft={draft} setDraft={setDraft} getLocation={getLocation} />}
+          {step === "contact"    && <ContactStep    draft={draft} setDraft={setDraft} />}
+          {step === "preview"    && <PreviewStep    draft={draft} jumpTo={jumpTo} />}
+        </div>
+      </div>
+
+      {/* Bottom continue button (hidden on status/species since they auto-advance, and on preview) */}
+      {step !== "status" && step !== "species" && step !== "preview" && (
+        <div style={{ position:"fixed", bottom:0, left:0, right:0, padding:"16px 24px 32px", background:"linear-gradient(0deg,#fff 60%,transparent)", zIndex:10 }}>
+          <button onClick={() => go(1)} disabled={!canContinue()}
+            style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"6px 6px 6px 28px", background:"#111", borderRadius:60, opacity: canContinue() ? 1 : 0.4, transition:"opacity 0.2s" }}>
+            <span style={{ fontSize:16, fontWeight:700, color:"#fff" }}>Continue</span>
+            <div style={{ width:48, height:48, borderRadius:24, background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <ArrowRight size={20} color="#111" strokeWidth={2.5} />
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* Preview submit button */}
+      {step === "preview" && (
+        <div style={{ position:"fixed", bottom:0, left:0, right:0, padding:"16px 24px 32px", background:"linear-gradient(0deg,#fff 60%,transparent)", zIndex:10 }}>
+          <button onClick={submit} disabled={submitting}
+            style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"6px 6px 6px 28px", background: draft.status === "found" ? "#16a34a" : "#dc2626", borderRadius:60, opacity: submitting ? 0.7 : 1 }}>
+            <span style={{ fontSize:16, fontWeight:700, color:"#fff" }}>{submitting ? "Submitting…" : "Submit Report"}</span>
+            <div style={{ width:48, height:48, borderRadius:24, background:"#fff", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <CheckCircle size={22} color={draft.status === "found" ? "#16a34a" : "#dc2626"} strokeWidth={2.5} />
+            </div>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Auth Gate ─────────────────────────────────────────── */
+function AuthGate({ onNavigate }: { onNavigate: (path: string) => void }) {
+  return (
+    <div style={{ minHeight:"100dvh", background:"#fff", display:"flex", flexDirection:"column" }}>
+      {/* Hero */}
+      <div style={{ background:"linear-gradient(160deg,#1c314e 0%,#2d4f78 100%)", padding:"72px 24px 56px", textAlign:"center", position:"relative" }}>
+        <button onClick={() => onNavigate("/")}
+          style={{ position:"absolute", top:52, left:20, width:38, height:38, borderRadius:19, background:"rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <ArrowLeft size={18} color="#fff" />
+        </button>
+        <img src="/logo.png" alt="nyc.pet" style={{ height:52, filter:"brightness(0) invert(1)", display:"block", margin:"0 auto 20px" }} />
+        <h1 style={{ fontSize:28, fontWeight:800, color:"#fff", lineHeight:1.2, marginBottom:10 }}>Sign in to report a pet</h1>
+        <p style={{ fontSize:14, color:"rgba(255,255,255,0.7)", lineHeight:1.7 }}>Create a free account so pet owners can reach you through our secure messaging.</p>
+      </div>
+
+      {/* White card */}
+      <div style={{ background:"#fff", borderRadius:"28px 28px 0 0", marginTop:-24, flex:1, padding:"32px 24px 48px" }}>
+        <div style={{ display:"flex", justifyContent:"center", marginBottom:28 }}>
+          <div style={{ width:36, height:4, borderRadius:2, background:"#e2e8f0" }} />
+        </div>
+
+        {/* Why section */}
+        {[
+          { icon:<MessageCircle size={18} color="#1c314e" strokeWidth={1.8}/>, text:"People contact you through nyc.pet's secure in-app messaging" },
+          { icon:<Lock size={18} color="#1c314e" strokeWidth={1.8}/>, text:"Your phone and email are never shared publicly" },
+          { icon:<CheckCircle size={18} color="#1c314e" strokeWidth={1.8}/>, text:"Manage your reports and mark pets as reunited" },
+        ].map((r,i) => (
+          <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:14, marginBottom:20 }}>
+            <div style={{ width:38, height:38, borderRadius:12, background:"#f0f4ff", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              {r.icon}
+            </div>
+            <p style={{ fontSize:14, color:"#444", lineHeight:1.7, paddingTop:8 }}>{r.text}</p>
+          </div>
+        ))}
+
+        <div style={{ marginTop:12, display:"flex", flexDirection:"column", gap:12 }}>
+          <button onClick={() => onNavigate("/login")}
+            style={{ width:"100%", padding:"17px", background:"#111", color:"#fff", borderRadius:16, fontSize:16, fontWeight:700 }}>
+            Sign In
+          </button>
+          <button onClick={() => onNavigate("/login?mode=signup")}
+            style={{ width:"100%", padding:"17px", background:"#f5f5f7", color:"#111", borderRadius:16, fontSize:16, fontWeight:700 }}>
+            Create Free Account
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Success Screen ─────────────────────────────────────── */
+function SuccessScreen({ draft, postId, onMap, onView }: { draft: Draft; postId: string | null; onMap: () => void; onView: () => void }) {
+  const isLost = draft.status === "lost";
+
+  async function share() {
+    const url = postId ? `${window.location.origin}/pet/${postId}` : window.location.origin;
+    const text = isLost
+      ? `Help find ${draft.name || "my pet"}! Lost ${draft.species?.toLowerCase()} in ${draft.location}. ${url}`
+      : `Found ${draft.name ? `a pet named ${draft.name}` : `a ${draft.species?.toLowerCase()}`} in ${draft.location}. ${url}`;
+    if (navigator.share) {
+      await navigator.share({ title: `${isLost ? "Lost" : "Found"} pet on nyc.pet`, text, url });
+    } else {
+      await navigator.clipboard.writeText(text);
+      alert("Link copied to clipboard!");
+    }
+  }
+
+  return (
+    <div style={{ minHeight:"100dvh", background:"#fff", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", textAlign:"center" }}>
+      <style>{`@keyframes popIn { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }`}</style>
+
+      {/* Animated checkmark */}
+      <div style={{ width:96, height:96, borderRadius:48, background: isLost ? "#fff5f5" : "#f0fff4", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:24, animation:"popIn 0.5s cubic-bezier(.4,0,.2,1) both" }}>
+        <PartyPopper size={44} color={ isLost ? "#dc2626" : "#16a34a"} strokeWidth={1.5} />
+      </div>
+
+      <h1 style={{ fontSize:32, fontWeight:900, color:"#111", lineHeight:1.2, marginBottom:10 }}>
+        {isLost ? "Report is live!" : "Thank you!"}
+      </h1>
+      <p style={{ fontSize:15, color:"#666", lineHeight:1.7, maxWidth:280, marginBottom:8 }}>
+        {isLost
+          ? `We've posted ${draft.name || "your pet"}'s report. Our community will keep an eye out.`
+          : `Your found pet report is live. The owner may already be searching for them.`}
+      </p>
+      <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#f8faff", borderRadius:30, padding:"8px 16px", marginBottom:36 }}>
+        <MapPin size={13} color="#aaa" />
+        <span style={{ fontSize:13, color:"#888" }}>{draft.location}</span>
+      </div>
+
+      <div style={{ width:"100%", display:"flex", flexDirection:"column", gap:12 }}>
+        <button onClick={share}
+          style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"center", gap:10, padding:"16px", background:"#111", color:"#fff", borderRadius:16, fontSize:15, fontWeight:700 }}>
+          <Share2 size={18} strokeWidth={2} /> Share this report
+        </button>
+        {postId && (
+          <button onClick={onView}
+            style={{ width:"100%", padding:"16px", background:"#f5f5f7", color:"#111", borderRadius:16, fontSize:15, fontWeight:700 }}>
+            View Report
+          </button>
+        )}
+        <button onClick={onMap}
+          style={{ width:"100%", padding:"16px", background:"transparent", color:"#aaa", borderRadius:16, fontSize:14, fontWeight:600 }}>
+          Back to Map
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step: Status ──────────────────────────────────────── */
+function StatusStep({ draft, setDraft, onSelect }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>>; onSelect: () => void }) {
+  function pick(s: Status) {
+    setDraft(d => ({ ...d, status: s }));
+    setTimeout(onSelect, 160);
+  }
+  return (
+    <div style={{ position:"relative", display:"flex", flexDirection:"column", gap:14, paddingTop:12 }}>
+
+      {/* Decorative corner image */}
+      <img
+        src="/dog-cat-right-corner.png"
+        alt=""
+        style={{ position:"fixed", bottom:0, right:0, width:110, pointerEvents:"none", zIndex:0, opacity:0.92 }}
+      />
+
+      {/* Comfort / encouragement message */}
+      <div style={{ background:"#f8faff", borderRadius:20, padding:"18px 20px", marginBottom:4 }}>
+        {draft.status === "found" ? (
+          <>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+              <Heart size={16} color="#60a5fa" fill="#bfdbfe" strokeWidth={2} />
+              <p style={{ fontSize:15, fontWeight:700, color:"#111" }}>Thank you for caring.</p>
+            </div>
+            <p style={{ fontSize:14, color:"#666", lineHeight:1.7 }}>
+              Finding a lost pet and taking action is an incredible act of kindness. You could be reuniting a family today — let's get this posted so the owner can find you.
+            </p>
+          </>
+        ) : (
+          <>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+              <Heart size={16} color="#dc2626" fill="#dc2626" strokeWidth={2} />
+              <p style={{ fontSize:15, fontWeight:700, color:"#111" }}>We're so sorry — we're here to help.</p>
+            </div>
+            <p style={{ fontSize:14, color:"#666", lineHeight:1.7 }}>
+              We know how frightening it is when a pet goes missing. Take a breath — you're doing the right thing by acting quickly. Our community is ready to help bring them home.
+            </p>
+          </>
+        )}
+      </div>
+
+      {[
+        { val:"lost"  as Status, label:"My pet is lost", sub:"I'm looking for my pet", icon:<HeartCrack size={28} color="#dc2626" fill="#fecaca" strokeWidth={2}/>, bg:"#fff5f5", border:"#fecaca", accent:"#dc2626" },
+        { val:"found" as Status, label:"I found a pet",  sub:"I found someone else's pet", icon:<Heart size={28} color="#60a5fa" fill="#bfdbfe" strokeWidth={1.8}/>, bg:"#eff6ff", border:"#bfdbfe", accent:"#60a5fa" },
+      ].map(o => (
+        <button key={o.val} onClick={() => pick(o.val)}
+          style={{ width:"100%", padding:"24px 20px", background: draft.status === o.val ? o.bg : "#f8faff", borderRadius:24, border:`2px solid ${draft.status === o.val ? o.border : "transparent"}`, display:"flex", alignItems:"center", gap:16, textAlign:"left", transition:"all 0.2s" }}>
+          <div style={{ width:60, height:60, borderRadius:20, background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 2px 8px rgba(0,0,0,0.08)", flexShrink:0 }}>
+            {o.icon}
+          </div>
+          <div>
+            <p style={{ fontSize:18, fontWeight:800, color:"#111", marginBottom:4 }}>{o.label}</p>
+            <p style={{ fontSize:13, color:"#888" }}>{o.sub}</p>
+          </div>
+          {draft.status === o.val && (
+            <div style={{ marginLeft:"auto", width:28, height:28, borderRadius:14, background:o.accent, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <CheckCircle size={16} color="#fff" />
+            </div>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Step: Species ─────────────────────────────────────── */
+function SpeciesStep({ draft, setDraft, onSelect }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>>; onSelect: () => void }) {
+  function pick(label: string) {
+    setDraft(d => ({ ...d, species: label }));
+    setTimeout(onSelect, 160);
+  }
+  return (
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, paddingTop:8 }}>
+      {SPECIES_LIST.map(s => (
+        <button key={s.label} onClick={() => pick(s.label)}
+          style={{ aspectRatio:"1", background: draft.species === s.label ? s.bg : "#f8faff", borderRadius:24, border:`2px solid ${draft.species === s.label ? s.accent+"66" : "transparent"}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:10, transition:"all 0.2s" }}>
+          <div style={{ width:52, height:52, borderRadius:18, background: draft.species === s.label ? s.accent+"22" : "#fff", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 1px 4px rgba(0,0,0,0.07)" }}>
+            <s.Icon size={26} color={draft.species === s.label ? s.accent : "#aaa"} strokeWidth={1.8} />
+          </div>
+          <span style={{ fontSize:13, fontWeight:700, color: draft.species === s.label ? s.accent : "#555" }}>{s.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Step: Name ────────────────────────────────────────── */
+function NameStep({ draft, setDraft }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>> }) {
+  return (
+    <div style={{ paddingTop:16 }}>
+      <input
+        autoFocus
+        type="text"
+        value={draft.name}
+        onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+        placeholder={`e.g. Buddy, Luna, Max…`}
+        style={{ width:"100%", fontSize:36, fontWeight:800, color:"#111", background:"transparent", border:"none", outline:"none", borderBottom:"3px solid #111", paddingBottom:16, fontFamily:"Fredoka, sans-serif", letterSpacing:0.5, textAlign:"center" }}
+      />
+    </div>
+  );
+}
+
+/* ─── Step: Appearance ──────────────────────────────────── */
+function AppearanceStep({ draft, setDraft }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>> }) {
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:24, paddingTop:8 }}>
+      {/* Breed */}
+      <div>
+        <label style={{ fontSize:12, fontWeight:800, color:"#aaa", textTransform:"uppercase", letterSpacing:1, display:"block", marginBottom:10 }}>Breed <span style={{ fontWeight:400 }}>(optional)</span></label>
+        <input type="text" value={draft.breed} onChange={e => setDraft(d => ({ ...d, breed: e.target.value }))} placeholder="e.g. Labrador, Siamese, Unknown…"
+          style={{ width:"100%", padding:"16px 18px", background:"#f5f5f7", borderRadius:16, fontSize:16, color:"#111", border:"none", outline:"none" }} />
+      </div>
+
+      {/* Color */}
+      <div>
+        <label style={{ fontSize:12, fontWeight:800, color:"#aaa", textTransform:"uppercase", letterSpacing:1, display:"block", marginBottom:10 }}>Primary Color</label>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+          {COLORS.map(c => (
+            <button key={c} onClick={() => setDraft(d => ({ ...d, color: c }))}
+              style={{ padding:"10px 16px", borderRadius:30, background: draft.color === c ? "#111" : "#f5f5f7", color: draft.color === c ? "#fff" : "#555", fontSize:14, fontWeight:600, border:"none", transition:"all 0.15s" }}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Size */}
+      <div>
+        <label style={{ fontSize:12, fontWeight:800, color:"#aaa", textTransform:"uppercase", letterSpacing:1, display:"block", marginBottom:10 }}>Size</label>
+        <div style={{ display:"flex", gap:10 }}>
+          {SIZES.map(s => (
+            <button key={s} onClick={() => setDraft(d => ({ ...d, size: s }))}
+              style={{ flex:1, padding:"14px 8px", borderRadius:16, background: draft.size === s ? "#111" : "#f5f5f7", color: draft.size === s ? "#fff" : "#555", fontSize:14, fontWeight:700, border:"none", transition:"all 0.15s" }}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Notes */}
+      <div>
+        <label style={{ fontSize:12, fontWeight:800, color:"#aaa", textTransform:"uppercase", letterSpacing:1, display:"block", marginBottom:10 }}>Extra Notes <span style={{ fontWeight:400 }}>(optional)</span></label>
+        <textarea value={draft.notes} onChange={e => setDraft(d => ({ ...d, notes: e.target.value }))} placeholder="Any distinguishing features, collar color, behavior…" rows={3}
+          style={{ width:"100%", padding:"16px 18px", background:"#f5f5f7", borderRadius:16, fontSize:15, color:"#111", border:"none", outline:"none", resize:"none", fontFamily:"inherit" }} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step: Photos ──────────────────────────────────────── */
+function PhotosStep({ draft, pickPhoto, removePhoto }: { draft: Draft; pickPhoto:(i:number)=>void; removePhoto:(i:number)=>void }) {
+  return (
+    <div style={{ paddingTop:8 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+        {[0,1,2,3].map(i => (
+          <div key={i} style={{ position:"relative", aspectRatio:"1", borderRadius:20, overflow:"hidden", background:"#f5f5f7", cursor:"pointer" }} onClick={() => !draft.previews[i] && pickPhoto(i)}>
+            {draft.previews[i] ? (
+              <>
+                <img src={draft.previews[i]!} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                <button onClick={e => { e.stopPropagation(); removePhoto(i); }}
+                  style={{ position:"absolute", top:8, right:8, width:28, height:28, borderRadius:14, background:"rgba(0,0,0,0.6)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <X size={14} color="#fff" />
+                </button>
+              </>
+            ) : (
+              <div style={{ width:"100%", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
+                <div style={{ width:44, height:44, borderRadius:14, background:"#e2e8f0", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <Camera size={20} color="#aaa" strokeWidth={1.8} />
+                </div>
+                <span style={{ fontSize:12, color:"#aaa", fontWeight:600 }}>Photo {i+1}{i===0?" *":""}</span>
+              </div>
+            )}
+            {draft.previews[i] && (
+              <div style={{ position:"absolute", bottom:8, left:8, background:"rgba(0,0,0,0.5)", borderRadius:8, padding:"3px 8px" }}>
+                <span style={{ fontSize:11, color:"#fff", fontWeight:700 }}>{i+1}</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <p style={{ fontSize:13, color:"#aaa", marginTop:14, textAlign:"center", lineHeight:1.6 }}>
+        Clear, well-lit photos significantly increase the chance of reunion
+      </p>
+    </div>
+  );
+}
+
+/* ─── Step: Location ────────────────────────────────────── */
+function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>>; getLocation: () => void }) {
+  return (
+    <div style={{ paddingTop:16 }}>
+      <div style={{ position:"relative" }}>
+        <MapPin size={18} color="#aaa" style={{ position:"absolute", left:16, top:"50%", transform:"translateY(-50%)" }} />
+        <input
+          autoFocus
+          type="text"
+          value={draft.location}
+          onChange={e => setDraft(d => ({ ...d, location: e.target.value }))}
+          placeholder="Neighborhood, street, or landmark…"
+          style={{ width:"100%", padding:"16px 52px 16px 46px", background:"#f5f5f7", borderRadius:16, fontSize:15, color:"#111", border:"none", outline:"none" }}
+        />
+        <button onClick={getLocation} style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", width:36, height:36, borderRadius:12, background:"#111", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <Navigation size={16} color="#fff" strokeWidth={2} />
+        </button>
+      </div>
+      <p style={{ fontSize:13, color:"#aaa", marginTop:12, lineHeight:1.6 }}>
+        Tap the GPS button to use your current location, or type a neighborhood or cross-street.
+      </p>
+    </div>
+  );
+}
+
+/* ─── Social SVG icons ───────────────────────────────────── */
+function FbIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="#1877f2">
+      <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.532-4.697 1.313 0 2.686.235 2.686.235v2.97h-1.513c-1.491 0-1.956.93-1.956 1.885v2.27h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+    </svg>
+  );
+}
+function IgIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="url(#ig)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <defs>
+        <linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#f09433"/>
+          <stop offset="25%" stopColor="#e6683c"/>
+          <stop offset="50%" stopColor="#dc2743"/>
+          <stop offset="75%" stopColor="#cc2366"/>
+          <stop offset="100%" stopColor="#bc1888"/>
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+      <circle cx="12" cy="12" r="4"/>
+      <circle cx="17.5" cy="6.5" r="1" fill="#dc2743" stroke="none"/>
+    </svg>
+  );
+}
+function XIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="#000">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+}
+function TikTokIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="#000">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/>
+    </svg>
+  );
+}
+
+/* ─── Toggle Switch ──────────────────────────────────────── */
+function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button onClick={onToggle} style={{ width:48, height:28, borderRadius:14, background: on ? "#111" : "#e2e8f0", position:"relative", flexShrink:0, transition:"background 0.2s" }}>
+      <div style={{ width:22, height:22, borderRadius:11, background:"#fff", position:"absolute", top:3, left: on ? 23 : 3, transition:"left 0.2s", boxShadow:"0 1px 4px rgba(0,0,0,0.2)" }} />
+    </button>
+  );
+}
+
+/* ─── Step: Contact ─────────────────────────────────────── */
+function ContactStep({ draft, setDraft }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>> }) {
+  const contacts = [
+    {
+      key: "messaging",
+      icon: <MessageCircle size={20} color="#16a34a" strokeWidth={1.8} />,
+      iconBg: "#f0fff4",
+      label: "In-app messaging",
+      sub: "Secure & private — always on",
+      alwaysOn: true,
+      enabled: true,
+      value: "",
+      placeholder: "",
+      type: "text",
+    },
+    {
+      key: "phone",
+      icon: <Phone size={20} color="#555" strokeWidth={1.8} />,
+      iconBg: "#f5f5f7",
+      label: "Phone number",
+      sub: "Only shown when you enable it",
+      alwaysOn: false,
+      enabled: draft.phoneEnabled,
+      value: draft.phone,
+      placeholder: "(212) 555-0100",
+      type: "tel",
+      onChange: (v: string) => setDraft(d => ({ ...d, phone: v })),
+      onToggle: () => setDraft(d => ({ ...d, phoneEnabled: !d.phoneEnabled })),
+    },
+    {
+      key: "email",
+      icon: <Mail size={20} color="#555" strokeWidth={1.8} />,
+      iconBg: "#f5f5f7",
+      label: "Email address",
+      sub: "Only shown when you enable it",
+      alwaysOn: false,
+      enabled: draft.emailEnabled,
+      value: draft.email,
+      placeholder: "you@example.com",
+      type: "email",
+      onChange: (v: string) => setDraft(d => ({ ...d, email: v })),
+      onToggle: () => setDraft(d => ({ ...d, emailEnabled: !d.emailEnabled })),
+    },
+    {
+      key: "facebook",
+      icon: <FbIcon size={20} />,
+      iconBg: "#eff6ff",
+      label: "Facebook",
+      sub: "Your profile username",
+      alwaysOn: false,
+      enabled: draft.facebookEnabled,
+      value: draft.facebook,
+      placeholder: "facebook.com/yourname",
+      type: "text",
+      onChange: (v: string) => setDraft(d => ({ ...d, facebook: v })),
+      onToggle: () => setDraft(d => ({ ...d, facebookEnabled: !d.facebookEnabled })),
+    },
+    {
+      key: "instagram",
+      icon: <IgIcon size={20} />,
+      iconBg: "#fff0f7",
+      label: "Instagram",
+      sub: "Your @username",
+      alwaysOn: false,
+      enabled: draft.instagramEnabled,
+      value: draft.instagram,
+      placeholder: "@yourhandle",
+      type: "text",
+      onChange: (v: string) => setDraft(d => ({ ...d, instagram: v })),
+      onToggle: () => setDraft(d => ({ ...d, instagramEnabled: !d.instagramEnabled })),
+    },
+    {
+      key: "tiktok",
+      icon: <TikTokIcon size={20} />,
+      iconBg: "#f0f0f0",
+      label: "TikTok",
+      sub: "Your @username",
+      alwaysOn: false,
+      enabled: draft.tiktokEnabled,
+      value: draft.tiktok,
+      placeholder: "@yourhandle",
+      type: "text",
+      onChange: (v: string) => setDraft(d => ({ ...d, tiktok: v })),
+      onToggle: () => setDraft(d => ({ ...d, tiktokEnabled: !d.tiktokEnabled })),
+    },
+    {
+      key: "twitter",
+      icon: <XIcon size={20} />,
+      iconBg: "#f5f5f5",
+      label: "X (Twitter)",
+      sub: "Your @username",
+      alwaysOn: false,
+      enabled: draft.twitterEnabled,
+      value: draft.twitter,
+      placeholder: "@yourhandle",
+      type: "text",
+      onChange: (v: string) => setDraft(d => ({ ...d, twitter: v })),
+      onToggle: () => setDraft(d => ({ ...d, twitterEnabled: !d.twitterEnabled })),
+    },
+  ];
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+      {/* Privacy note */}
+      <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
+        <Lock size={13} color="#aaa" strokeWidth={2} />
+        <p style={{ fontSize:12, color:"#aaa", fontWeight:600 }}>Your contact info is never shared without your permission</p>
+      </div>
+
+      {contacts.map(c => (
+        <div key={c.key} style={{ background:"#f8faff", borderRadius:20, padding:"16px 18px", border: c.enabled ? "1.5px solid #e2e8f0" : "1.5px solid transparent", transition:"border 0.2s" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ width:42, height:42, borderRadius:14, background: c.iconBg, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              {c.icon}
+            </div>
+            <div style={{ flex:1 }}>
+              <p style={{ fontSize:14, fontWeight:700, color:"#111" }}>{c.label}</p>
+              <p style={{ fontSize:12, color:"#aaa" }}>{c.sub}</p>
+            </div>
+            {c.alwaysOn
+              ? <div style={{ padding:"5px 10px", background:"#f0fff4", borderRadius:20 }}><span style={{ fontSize:11, fontWeight:700, color:"#16a34a" }}>ON</span></div>
+              : <Toggle on={c.enabled} onToggle={c.onToggle!} />
+            }
+          </div>
+          {c.enabled && !c.alwaysOn && (
+            <input
+              type={c.type}
+              value={c.value}
+              onChange={e => c.onChange?.(e.target.value)}
+              placeholder={c.placeholder}
+              style={{ width:"100%", marginTop:12, padding:"13px 16px", background:"#fff", borderRadius:14, fontSize:14, color:"#111", border:"1.5px solid #e2e8f0", outline:"none" }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Step: Preview ─────────────────────────────────────── */
+function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => void }) {
+  const heroPhoto = draft.previews[0];
+  const speciesInfo = SPECIES_LIST.find(s => s.label === draft.species);
+
+  return (
+    <div style={{ paddingTop:4 }}>
+      {/* Pet card mockup */}
+      <div style={{ background:"#fff", borderRadius:24, overflow:"hidden", boxShadow:"0 4px 24px rgba(0,0,0,0.10)", marginBottom:20 }}>
+        {/* Hero photo */}
+        <div style={{ height:200, background: heroPhoto ? "transparent" : "#f0f4f8", position:"relative", overflow:"hidden" }}>
+          {heroPhoto
+            ? <img src={heroPhoto} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+            : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <Camera size={36} color="#ccc" strokeWidth={1.5} />
+              </div>
+          }
+          {/* Status pill */}
+          <div style={{ position:"absolute", top:12, left:12, background: draft.status === "lost" ? "#dc2626" : "#16a34a", padding:"5px 14px", borderRadius:30 }}>
+            <span style={{ fontSize:12, fontWeight:800, color:"#fff", textTransform:"uppercase", letterSpacing:1 }}>{draft.status}</span>
+          </div>
+        </div>
+
+        {/* Details */}
+        <div style={{ padding:"16px 20px 20px" }}>
+          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:12 }}>
+            <div>
+              <h2 style={{ fontSize:22, fontWeight:900, color:"#111" }}>{draft.name || "No name"}</h2>
+              <p style={{ fontSize:14, color:"#888", marginTop:2 }}>
+                {[draft.species, draft.breed].filter(Boolean).join(" · ")}
+              </p>
+            </div>
+            <button onClick={() => jumpTo("name")} style={{ width:34, height:34, borderRadius:12, background:"#f5f5f7", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <Pencil size={15} color="#555" strokeWidth={1.8} />
+            </button>
+          </div>
+
+          {/* Info rows */}
+          {[
+            { label:"Color", value: draft.color, step:"appearance" as StepKey },
+            { label:"Size",  value: draft.size,  step:"appearance" as StepKey },
+            { label:"Location", value: draft.location, step:"location" as StepKey },
+            { label:"Notes", value: draft.notes, step:"appearance" as StepKey },
+          ].filter(r => r.value).map(r => (
+            <div key={r.label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:10, borderTop:"1px solid #f5f5f7" }}>
+              <div>
+                <p style={{ fontSize:11, color:"#aaa", fontWeight:700, textTransform:"uppercase", letterSpacing:0.8 }}>{r.label}</p>
+                <p style={{ fontSize:14, color:"#333", marginTop:2 }}>{r.value}</p>
+              </div>
+              <button onClick={() => jumpTo(r.step)} style={{ width:30, height:30, borderRadius:10, background:"#f5f5f7", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <Pencil size={13} color="#888" strokeWidth={1.8} />
+              </button>
+            </div>
+          ))}
+
+          {/* Photo strip */}
+          {draft.previews.some(Boolean) && (
+            <div style={{ display:"flex", gap:8, marginTop:14, overflowX:"auto" }}>
+              {draft.previews.filter(Boolean).map((p, i) => (
+                <img key={i} src={p!} style={{ width:60, height:60, borderRadius:12, objectFit:"cover", flexShrink:0 }} />
+              ))}
+              <button onClick={() => jumpTo("photos")} style={{ width:60, height:60, borderRadius:12, background:"#f5f5f7", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <Plus size={18} color="#aaa" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Edit sections */}
+      <div style={{ background:"#f8faff", borderRadius:16, padding:"12px 16px", marginBottom:12, display:"flex", alignItems:"flex-start", gap:10 }}>
+        <Pencil size={15} color="#aaa" strokeWidth={1.8} style={{ marginTop:2, flexShrink:0 }} />
+        <p style={{ fontSize:13, color:"#888", lineHeight:1.6 }}>
+          Need to fix something? Tap any section below to jump back and edit, or use the back arrow at the top.
+        </p>
+      </div>
+      <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:8 }}>
+        {(["status","species","name","appearance","photos","location","contact"] as StepKey[]).map(s => (
+          <button key={s} onClick={() => jumpTo(s)}
+            style={{ padding:"9px 16px", background:"#f0f0f5", borderRadius:20, fontSize:13, fontWeight:600, color:"#444", display:"flex", alignItems:"center", gap:6 }}>
+            <Pencil size={12} color="#888" strokeWidth={2} />
+            {s.charAt(0).toUpperCase() + s.slice(1)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

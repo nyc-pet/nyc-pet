@@ -1,0 +1,23 @@
+{
+  "name": "nyc-pet-mobile",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6"
+  },
+  "dependencies": {
+    "@marsidev/react-turnstile": "^1.6.3",
+    "@supabase/supabase-js": "^2.119.2",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.77.0",
+    "react-router-dom": "^7.18.6"
+  }
+}
