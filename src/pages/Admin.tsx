@@ -81,7 +81,8 @@ export default function Admin() {
 
   async function approvePost(id: string) {
     setActionLoading(id + "_approve");
-    await supabase.from("pet_posts").update({ approved: true }).eq("id", id);
+    const { error } = await supabase.rpc("admin_update_post", { post_id: id, updates: { approved: true } });
+    if (error) { alert("Error: " + error.message); setActionLoading(null); return; }
     setPosts(ps => ps.map(p => p.id === id ? { ...p, approved: true } : p));
     setPostStats(s => ({ ...s, pending: s.pending - 1, approved: s.approved + 1 }));
     setActionLoading(null);
@@ -89,7 +90,8 @@ export default function Admin() {
 
   async function rejectPost(id: string) {
     setActionLoading(id + "_reject");
-    await supabase.from("pet_posts").update({ approved: false }).eq("id", id);
+    const { error } = await supabase.rpc("admin_update_post", { post_id: id, updates: { approved: false } });
+    if (error) { alert("Error: " + error.message); setActionLoading(null); return; }
     setPosts(ps => ps.map(p => p.id === id ? { ...p, approved: false } : p));
     setPostStats(s => ({ ...s, pending: s.pending + 1, approved: s.approved - 1 }));
     setActionLoading(null);
@@ -98,7 +100,7 @@ export default function Admin() {
   async function deletePost(id: string) {
     if (!confirm("Permanently delete this post?")) return;
     setActionLoading(id + "_delete");
-    const { error } = await supabase.from("pet_posts").delete().eq("id", id);
+    const { error } = await supabase.rpc("admin_delete_post", { post_id: id });
     if (error) { alert("Delete failed: " + error.message); setActionLoading(null); return; }
     setPosts(ps => ps.filter(p => p.id !== id));
     setPostStats(s => ({ ...s, total: s.total - 1 }));
@@ -109,7 +111,7 @@ export default function Admin() {
   async function savePost() {
     if (!selectedPost) return;
     setSaveLoading(true);
-    const { error } = await supabase.from("pet_posts").update(postForm).eq("id", selectedPost.id);
+    const { error } = await supabase.rpc("admin_update_post", { post_id: selectedPost.id, updates: postForm });
     if (error) { alert(error.message); setSaveLoading(false); return; }
     const updated = { ...selectedPost, ...postForm };
     setPosts(ps => ps.map(p => p.id === selectedPost.id ? updated : p));
