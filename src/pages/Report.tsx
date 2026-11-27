@@ -223,6 +223,7 @@ export default function Report() {
     const { data: inserted, error: insertError } = await supabase.from("pet_posts").insert({
       user_id:           user.id,
       contact_name:      draft.contactName.trim() || "Anonymous",
+      contact_email:     "",
       status:            draft.status,
       species:           draft.species,
       name:              draft.name,
