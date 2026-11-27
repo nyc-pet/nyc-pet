@@ -80,7 +80,7 @@ export default function ReportGate({ onClose }: Props) {
         width: "min(420px, 100%)",
         background: "#171716",
         borderRadius: "32px",
-        border: "1px solid rgba(255,255,255,0.85)",
+        border: "2px solid rgba(255,255,255,0.85)",
         position: "relative",
         overflow: "hidden",
         color: "white",
@@ -99,7 +99,7 @@ export default function ReportGate({ onClose }: Props) {
 
           {/* Title */}
           <h1 style={{
-            fontSize: "7.25cqw",
+            fontSize: "9cqw",
             lineHeight: 1.23,
             letterSpacing: "-0.045em",
             fontWeight: 500,
@@ -111,7 +111,7 @@ export default function ReportGate({ onClose }: Props) {
 
           {/* Body */}
           <p style={{
-            fontSize: "3.35cqw",
+            fontSize: "4.2cqw",
             lineHeight: 1.6,
             color: "#a6a6a6",
             margin: 0,
@@ -130,7 +130,7 @@ export default function ReportGate({ onClose }: Props) {
                   borderRadius: 24,
                   padding: "2cqw 4cqw",
                   color: "#c8d8ff",
-                  fontSize: "3.1cqw",
+                  fontSize: "3.8cqw",
                   display: "flex",
                   alignItems: "center",
                   gap: "1.5cqw",
@@ -160,7 +160,7 @@ export default function ReportGate({ onClose }: Props) {
                 }}>
                   {slide.linkContent.map((item, i) => (
                     <li key={i} style={{
-                      fontSize: "3.1cqw",
+                      fontSize: "3.8cqw",
                       color: "#b0b0b0",
                       lineHeight: 1.5,
                     }}>
@@ -204,7 +204,7 @@ export default function ReportGate({ onClose }: Props) {
             </span>
             <span
               onClick={() => setChecked(!checked)}
-              style={{ fontSize: "3.1cqw", color: "#c0c0c0", textAlign: "left", lineHeight: 1.4 }}
+              style={{ fontSize: "3.8cqw", color: "#c0c0c0", textAlign: "left", lineHeight: 1.4 }}
             >
               {slide.label}
             </span>
