@@ -848,6 +848,7 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
       {mapMode ? (
         /* ── Map picker ── */
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          <p style={{ fontSize:13, fontWeight:700, color:"#555", marginBottom:0 }}>Last seen location</p>
           {/* Zip / address search */}
           <div style={{ display:"flex", gap:8 }}>
             <div style={{ flex:1, position:"relative" }}>
@@ -887,6 +888,8 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
         </div>
       ) : (
         /* ── Text input ── */
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          <p style={{ fontSize:13, fontWeight:700, color:"#555" }}>Last seen location</p>
         <div style={{ position:"relative" }}>
           <MapPin size={18} color="#aaa" style={{ position:"absolute", left:16, top:"50%", transform:"translateY(-50%)" }} />
           <input
@@ -900,6 +903,7 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
           <button onClick={getLocation} style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", width:36, height:36, borderRadius:12, background:"#111", display:"flex", alignItems:"center", justifyContent:"center" }}>
             <Navigation size={16} color="#fff" strokeWidth={2} />
           </button>
+        </div>
         </div>
       )}
 
