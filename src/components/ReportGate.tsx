@@ -71,14 +71,15 @@ export default function ReportGate({ onClose }: Props) {
     <div style={{
       position: "fixed", inset: 0, zIndex: 10100,
       background: "rgba(0,0,0,0.75)",
-      display: "flex", alignItems: "flex-end", justifyContent: "center",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "24px",
       animation: "fadeIn 0.2s ease",
     }}>
       {/* Wave card */}
       <div style={{
         width: "min(420px, 100%)",
         background: "#171716",
-        borderRadius: "48px 48px 0 0",
+        borderRadius: "32px",
         position: "relative",
         overflow: "hidden",
         color: "white",
