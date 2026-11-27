@@ -462,44 +462,53 @@ export default function Report() {
 function AuthGate({ onNavigate }: { onNavigate: (path: string) => void }) {
   return (
     <div style={{ minHeight:"100dvh", background:"#fff", display:"flex", flexDirection:"column" }}>
-      {/* Hero */}
-      <div style={{ background:"linear-gradient(160deg,#1c314e 0%,#2d4f78 100%)", padding:"72px 24px 56px", textAlign:"center", position:"relative" }}>
+
+      {/* Black hero with arch */}
+      <div style={{ background:"linear-gradient(160deg,#111 0%,#1c1c1e 100%)", position:"relative", paddingBottom:52, textAlign:"center" }}>
+        {/* Back button */}
         <button onClick={() => onNavigate("/")}
-          style={{ position:"absolute", top:52, left:20, width:38, height:38, borderRadius:19, background:"rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          style={{ position:"absolute", top:52, left:20, width:40, height:40, borderRadius:20, background:"rgba(255,255,255,0.1)", border:"none", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
           <ArrowLeft size={18} color="#fff" />
         </button>
-        <img src="/logo.png" alt="nyc.pet" style={{ height:52, filter:"brightness(0) invert(1)", display:"block", margin:"0 auto 20px" }} />
-        <h1 style={{ fontSize:28, fontWeight:800, color:"#fff", lineHeight:1.2, marginBottom:10 }}>Sign in to report a pet</h1>
-        <p style={{ fontSize:14, color:"rgba(255,255,255,0.7)", lineHeight:1.7 }}>Create a free account so pet owners can reach you through our secure messaging.</p>
+
+        {/* Logo + heading */}
+        <div style={{ padding:"72px 24px 0" }}>
+          <img src="/logo.png" alt="nyc.pet" style={{ height:48, filter:"brightness(0) invert(1)", display:"block", margin:"0 auto 24px" }} />
+          <h1 style={{ fontSize:28, fontWeight:900, color:"#fff", lineHeight:1.2, marginBottom:10 }}>Sign in to report a pet</h1>
+          <p style={{ fontSize:14, color:"rgba(255,255,255,0.55)", lineHeight:1.7, maxWidth:280, margin:"0 auto" }}>Create a free account so pet owners can reach you through our secure messaging.</p>
+        </div>
+
+        {/* Arch SVG */}
+        <svg style={{ position:"absolute", bottom:-1, left:0, width:"100%", display:"block" }}
+          viewBox="0 0 390 34" preserveAspectRatio="none" aria-hidden="true">
+          <path fill="#fff" d="M0 34 C0 15 15 0 34 0 H136 C159 0 175 28 195 28 C215 28 231 0 254 0 H356 C375 0 390 15 390 34 Z"/>
+        </svg>
       </div>
 
-      {/* White card */}
-      <div style={{ background:"#fff", borderRadius:"28px 28px 0 0", marginTop:-24, flex:1, padding:"32px 24px 48px" }}>
-        <div style={{ display:"flex", justifyContent:"center", marginBottom:28 }}>
-          <div style={{ width:36, height:4, borderRadius:2, background:"#e2e8f0" }} />
-        </div>
+      {/* White content */}
+      <div style={{ flex:1, padding:"36px 24px 48px" }}>
 
         {/* Why section */}
         {[
-          { icon:<MessageCircle size={18} color="#1c314e" strokeWidth={1.8}/>, text:"People contact you through nyc.pet's secure in-app messaging" },
-          { icon:<Lock size={18} color="#1c314e" strokeWidth={1.8}/>, text:"Your phone and email are never shared publicly" },
-          { icon:<CheckCircle size={18} color="#1c314e" strokeWidth={1.8}/>, text:"Manage your reports and mark pets as reunited" },
+          { icon:<MessageCircle size={18} color="#111" strokeWidth={1.8}/>, text:"People contact you through nyc.pet's secure in-app messaging" },
+          { icon:<Lock size={18} color="#111" strokeWidth={1.8}/>, text:"Your phone and email are never shared publicly" },
+          { icon:<CheckCircle size={18} color="#111" strokeWidth={1.8}/>, text:"Manage your reports and mark pets as reunited" },
         ].map((r,i) => (
           <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:14, marginBottom:20 }}>
-            <div style={{ width:38, height:38, borderRadius:12, background:"#f0f4ff", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <div style={{ width:40, height:40, borderRadius:12, background:"#f5f5f7", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
               {r.icon}
             </div>
-            <p style={{ fontSize:14, color:"#444", lineHeight:1.7, paddingTop:8 }}>{r.text}</p>
+            <p style={{ fontSize:14, color:"#444", lineHeight:1.7, paddingTop:10 }}>{r.text}</p>
           </div>
         ))}
 
-        <div style={{ marginTop:12, display:"flex", flexDirection:"column", gap:12 }}>
+        <div style={{ marginTop:20, display:"flex", flexDirection:"column", gap:12 }}>
           <button onClick={() => onNavigate("/login")}
-            style={{ width:"100%", padding:"17px", background:"#111", color:"#fff", borderRadius:16, fontSize:16, fontWeight:700 }}>
+            style={{ width:"100%", padding:"17px", background:"#111", color:"#fff", borderRadius:16, fontSize:16, fontWeight:700, border:"none", cursor:"pointer" }}>
             Sign In
           </button>
           <button onClick={() => onNavigate("/login?mode=signup")}
-            style={{ width:"100%", padding:"17px", background:"#f5f5f7", color:"#111", borderRadius:16, fontSize:16, fontWeight:700 }}>
+            style={{ width:"100%", padding:"17px", background:"#f5f5f7", color:"#111", borderRadius:16, fontSize:16, fontWeight:700, border:"none", cursor:"pointer" }}>
             Create Free Account
           </button>
         </div>
