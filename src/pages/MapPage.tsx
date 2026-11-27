@@ -91,7 +91,7 @@ export default function MapPage() {
   ];
 
   useEffect(() => {
-    supabase.from("pet_posts").select("*")
+    supabase.from("pet_posts").select("*").eq("approved", true)
       .order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setPosts(data as PetPost[]); });
   }, []);

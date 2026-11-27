@@ -42,7 +42,7 @@ export default function Discover() {
   const [geocoding, setGeocoding] = useState(false);
 
   useEffect(() => {
-    supabase.from("pet_posts").select("*").order("created_at", { ascending: false })
+    supabase.from("pet_posts").select("*").eq("approved", true).order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setPosts(data as PetPost[]); setLoading(false); });
     navigator.geolocation?.getCurrentPosition(pos => {
       setUserLat(pos.coords.latitude);
