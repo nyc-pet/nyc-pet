@@ -153,7 +153,6 @@ export default function PetDetail() {
               ["Species", post.species],
               ["Color", post.color || "—"],
               ["Breed", post.breed || "—"],
-              ["Reward", post.reward || "—"],
             ].map(([label, val]) => (
               <div key={label} style={{ padding: "12px 14px", background: "var(--gray-1)", borderRadius: 14 }}>
                 <p style={{ fontSize: 11, color: "var(--gray-4)", fontWeight: 600, marginBottom: 4 }}>{label}</p>
