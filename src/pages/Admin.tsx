@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import type { PetPost } from "../lib/supabase";
-import { Trash2, CheckCircle, XCircle, Eye, RefreshCw, Users, FileText, ShieldCheck, ShieldOff, Mail, Calendar, LogIn } from "lucide-react";
+import { Trash2, CheckCircle, XCircle, Eye, RefreshCw, Users, FileText, ShieldCheck, ShieldOff, Mail, Calendar, LogIn, Edit2, Save, X } from "lucide-react";
 
 function timeAgo(d: string) {
   const h = Math.floor((Date.now() - new Date(d).getTime()) / 3600000);
@@ -44,6 +44,13 @@ export default function Admin() {
   const [userPosts, setUserPosts] = useState<PetPost[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersFuncMissing, setUsersFuncMissing] = useState(false);
+
+  // Edit state
+  const [editingPost, setEditingPost] = useState(false);
+  const [postForm, setPostForm] = useState<Partial<PetPost>>({});
+  const [editingUser, setEditingUser] = useState(false);
+  const [userForm, setUserForm] = useState({ name: "", email: "" });
+  const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -98,6 +105,30 @@ export default function Admin() {
     setActionLoading(null);
   }
 
+  async function savePost() {
+    if (!selectedPost) return;
+    setSaveLoading(true);
+    const { error } = await supabase.from("pet_posts").update(postForm).eq("id", selectedPost.id);
+    if (error) { alert(error.message); setSaveLoading(false); return; }
+    const updated = { ...selectedPost, ...postForm };
+    setPosts(ps => ps.map(p => p.id === selectedPost.id ? updated : p));
+    setSelectedPost(updated);
+    setEditingPost(false);
+    setSaveLoading(false);
+  }
+
+  async function saveUser() {
+    if (!selectedUser) return;
+    setSaveLoading(true);
+    const { error } = await supabase.rpc("admin_update_user", { user_id: selectedUser.id, new_name: userForm.name, new_email: userForm.email });
+    if (error) { alert(error.message); setSaveLoading(false); return; }
+    const updated = { ...selectedUser, email: userForm.email, raw_user_meta_data: { ...selectedUser.raw_user_meta_data, full_name: userForm.name } };
+    setUsers(us => us.map(u => u.id === selectedUser.id ? updated : u));
+    setSelectedUser(updated);
+    setEditingUser(false);
+    setSaveLoading(false);
+  }
+
   // ── USERS ──────────────────────────────────────────────
   async function loadUsers() {
     setUsersLoading(true);
@@ -137,7 +168,15 @@ export default function Admin() {
 
   function selectUser(user: AdminUser) {
     setSelectedUser(user);
+    setEditingUser(false);
+    setUserForm({ name: (user.raw_user_meta_data?.full_name || user.raw_user_meta_data?.name || "") as string, email: user.email });
     loadUserPosts(user.id);
+  }
+
+  function selectPost(post: PetPost) {
+    setSelectedPost(selectedPost?.id === post.id ? null : post);
+    setEditingPost(false);
+    setPostForm({ name: post.name, status: post.status, description: post.description, last_seen_address: post.last_seen_address, contact_name: post.contact_name, contact_phone: post.contact_phone, contact_email: post.contact_email, reward: post.reward });
   }
 
   // ── AUTH ERRORS ────────────────────────────────────────
@@ -266,7 +305,7 @@ export default function Admin() {
                   </thead>
                   <tbody>
                     {filteredPosts.map(post => (
-                      <tr key={post.id} onClick={() => setSelectedPost(selectedPost?.id === post.id ? null : post)} style={{ borderBottom: "1px solid #1e1e1e", cursor: "pointer", background: selectedPost?.id === post.id ? "rgba(255,255,255,0.04)" : "transparent", transition: "background 0.1s" }}>
+                      <tr key={post.id} onClick={() => selectPost(post)} style={{ borderBottom: "1px solid #1e1e1e", cursor: "pointer", background: selectedPost?.id === post.id ? "rgba(255,255,255,0.04)" : "transparent", transition: "background 0.1s" }}>
                         <td style={{ padding: "10px 16px" }}>
                           <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", background: "#222" }}>
                             {post.photo_url ? <img src={post.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🐾</div>}
@@ -382,41 +421,75 @@ export default function Admin() {
 
           {/* Post detail */}
           {section === "posts" && selectedPost && (
-            <div style={{ width: 320, background: "#181818", borderLeft: "1px solid #2a2a2a", overflow: "auto", flexShrink: 0, padding: 24 }}>
+            <div style={{ width: 340, background: "#181818", borderLeft: "1px solid #2a2a2a", overflow: "auto", flexShrink: 0, padding: 24 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <p style={{ fontSize: 16, fontWeight: 800, color: "#fff", margin: 0 }}>Post Details</p>
-                <button onClick={() => setSelectedPost(null)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>×</button>
+                <p style={{ fontSize: 16, fontWeight: 800, color: "#fff", margin: 0 }}>{editingPost ? "Edit Post" : "Post Details"}</p>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {!editingPost && <button onClick={() => setEditingPost(true)} style={{ background: "#222", border: "1px solid #333", borderRadius: 8, padding: "5px 10px", color: "#aaa", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}><Edit2 size={12} /> Edit</button>}
+                  <button onClick={() => { setSelectedPost(null); setEditingPost(false); }} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>×</button>
+                </div>
               </div>
+
               {selectedPost.photo_url && <img src={selectedPost.photo_url} style={{ width: "100%", borderRadius: 14, marginBottom: 16, objectFit: "cover", maxHeight: 200 }} />}
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <Row label="Name" value={selectedPost.name || "—"} />
-                <Row label="Species" value={selectedPost.species} />
-                <Row label="Breed" value={selectedPost.breed || "—"} />
-                <Row label="Color" value={selectedPost.color || "—"} />
-                <Row label="Status" value={selectedPost.status} />
-                <Row label="Location" value={selectedPost.last_seen_address} />
-                <Row label="Coordinates" value={selectedPost.lat ? `${selectedPost.lat.toFixed(5)}, ${selectedPost.lng.toFixed(5)}` : "—"} />
-                {selectedPost.description && <Row label="Description" value={selectedPost.description} />}
-                <Row label="Contact Name" value={selectedPost.contact_name || "—"} />
-                <Row label="Contact Phone" value={selectedPost.contact_phone || "—"} />
-                <Row label="Contact Email" value={selectedPost.contact_email || "—"} />
-                {selectedPost.reward && <Row label="Reward" value={selectedPost.reward} highlight />}
-                <Row label="Posted" value={new Date(selectedPost.created_at).toLocaleString()} />
-                <Row label="Post ID" value={selectedPost.id} mono />
-              </div>
-              <div style={{ marginTop: 20, display: "flex", gap: 8 }}>
-                <button onClick={() => window.open(`/pet/${selectedPost.id}`, "_blank")} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#222", color: "#aaa", border: "1px solid #333", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>View Public Page</button>
-                <button onClick={() => deletePost(selectedPost.id)} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#3a1a1a", color: "#ff3b30", border: "1px solid #4a2a2a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Delete Post</button>
-              </div>
+
+              {editingPost ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <EditField label="Pet Name" value={postForm.name || ""} onChange={v => setPostForm(f => ({ ...f, name: v }))} />
+                  <div>
+                    <p style={{ fontSize: 11, color: "#555", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 6px" }}>Status</p>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {["lost", "found"].map(s => (
+                        <button key={s} onClick={() => setPostForm(f => ({ ...f, status: s as "lost" | "found" }))} style={{ flex: 1, padding: "8px", borderRadius: 8, border: `1px solid ${postForm.status === s ? (s === "lost" ? "#ff3b30" : "#34c759") : "#333"}`, background: postForm.status === s ? (s === "lost" ? "#3a1a1a" : "#1a3a1a") : "#111", color: postForm.status === s ? (s === "lost" ? "#ff3b30" : "#34c759") : "#666", fontSize: 13, fontWeight: 600, cursor: "pointer", textTransform: "capitalize" }}>{s}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <EditField label="Location" value={postForm.last_seen_address || ""} onChange={v => setPostForm(f => ({ ...f, last_seen_address: v }))} />
+                  <EditField label="Description" value={postForm.description || ""} onChange={v => setPostForm(f => ({ ...f, description: v }))} multiline />
+                  <EditField label="Contact Name" value={postForm.contact_name || ""} onChange={v => setPostForm(f => ({ ...f, contact_name: v }))} />
+                  <EditField label="Contact Phone" value={postForm.contact_phone || ""} onChange={v => setPostForm(f => ({ ...f, contact_phone: v }))} />
+                  <EditField label="Contact Email" value={postForm.contact_email || ""} onChange={v => setPostForm(f => ({ ...f, contact_email: v }))} />
+                  <EditField label="Reward" value={postForm.reward || ""} onChange={v => setPostForm(f => ({ ...f, reward: v }))} />
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <button onClick={() => setEditingPost(false)} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#222", color: "#aaa", border: "1px solid #333", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><X size={14} /> Cancel</button>
+                    <button onClick={savePost} disabled={saveLoading} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#fff", color: "#111", border: "none", fontSize: 13, fontWeight: 700, cursor: saveLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: saveLoading ? 0.7 : 1 }}><Save size={14} /> {saveLoading ? "Saving…" : "Save"}</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <Row label="Name" value={selectedPost.name || "—"} />
+                    <Row label="Species" value={selectedPost.species} />
+                    <Row label="Breed" value={selectedPost.breed || "—"} />
+                    <Row label="Color" value={selectedPost.color || "—"} />
+                    <Row label="Status" value={selectedPost.status} />
+                    <Row label="Location" value={selectedPost.last_seen_address} />
+                    <Row label="Coordinates" value={selectedPost.lat ? `${selectedPost.lat.toFixed(5)}, ${selectedPost.lng.toFixed(5)}` : "—"} />
+                    {selectedPost.description && <Row label="Description" value={selectedPost.description} />}
+                    <Row label="Contact Name" value={selectedPost.contact_name || "—"} />
+                    <Row label="Contact Phone" value={selectedPost.contact_phone || "—"} />
+                    <Row label="Contact Email" value={selectedPost.contact_email || "—"} />
+                    {selectedPost.reward && <Row label="Reward" value={selectedPost.reward} highlight />}
+                    <Row label="Posted" value={new Date(selectedPost.created_at).toLocaleString()} />
+                    <Row label="Post ID" value={selectedPost.id} mono />
+                  </div>
+                  <div style={{ marginTop: 20, display: "flex", gap: 8 }}>
+                    <button onClick={() => window.open(`/pet/${selectedPost.id}`, "_blank")} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#222", color: "#aaa", border: "1px solid #333", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>View Public</button>
+                    <button onClick={() => deletePost(selectedPost.id)} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#3a1a1a", color: "#ff3b30", border: "1px solid #4a2a2a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Delete</button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
           {/* User detail */}
           {section === "users" && selectedUser && (
-            <div style={{ width: 320, background: "#181818", borderLeft: "1px solid #2a2a2a", overflow: "auto", flexShrink: 0, padding: 24 }}>
+            <div style={{ width: 340, background: "#181818", borderLeft: "1px solid #2a2a2a", overflow: "auto", flexShrink: 0, padding: 24 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <p style={{ fontSize: 16, fontWeight: 800, color: "#fff", margin: 0 }}>User Details</p>
-                <button onClick={() => setSelectedUser(null)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>×</button>
+                <p style={{ fontSize: 16, fontWeight: 800, color: "#fff", margin: 0 }}>{editingUser ? "Edit User" : "User Details"}</p>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {!editingUser && <button onClick={() => setEditingUser(true)} style={{ background: "#222", border: "1px solid #333", borderRadius: 8, padding: "5px 10px", color: "#aaa", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}><Edit2 size={12} /> Edit</button>}
+                  <button onClick={() => { setSelectedUser(null); setEditingUser(false); }} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>×</button>
+                </div>
               </div>
 
               {/* Avatar */}
@@ -431,20 +504,31 @@ export default function Admin() {
                 <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0" }}>{selectedUser.email}</p>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Mail size={14} style={{ color: "#555" }} />
-                  <span style={{ fontSize: 13, color: "#888" }}>{selectedUser.provider} login</span>
+              {editingUser ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+                  <EditField label="Display Name" value={userForm.name} onChange={v => setUserForm(f => ({ ...f, name: v }))} />
+                  <EditField label="Email Address" value={userForm.email} onChange={v => setUserForm(f => ({ ...f, email: v }))} />
+                  <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                    <button onClick={() => setEditingUser(false)} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#222", color: "#aaa", border: "1px solid #333", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><X size={14} /> Cancel</button>
+                    <button onClick={saveUser} disabled={saveLoading} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#fff", color: "#111", border: "none", fontSize: 13, fontWeight: 700, cursor: saveLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: saveLoading ? 0.7 : 1 }}><Save size={14} /> {saveLoading ? "Saving…" : "Save"}</button>
+                  </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Calendar size={14} style={{ color: "#555" }} />
-                  <span style={{ fontSize: 13, color: "#888" }}>Joined {new Date(selectedUser.created_at).toLocaleDateString()}</span>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Mail size={14} style={{ color: "#555" }} />
+                    <span style={{ fontSize: 13, color: "#888" }}>{selectedUser.provider} login</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Calendar size={14} style={{ color: "#555" }} />
+                    <span style={{ fontSize: 13, color: "#888" }}>Joined {new Date(selectedUser.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <LogIn size={14} style={{ color: "#555" }} />
+                    <span style={{ fontSize: 13, color: "#888" }}>Last seen {selectedUser.last_sign_in_at ? timeAgo(selectedUser.last_sign_in_at) : "never"}</span>
+                  </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <LogIn size={14} style={{ color: "#555" }} />
-                  <span style={{ fontSize: 13, color: "#888" }}>Last seen {selectedUser.last_sign_in_at ? timeAgo(selectedUser.last_sign_in_at) : "never"}</span>
-                </div>
-              </div>
+              )}
 
               {/* Their posts */}
               <p style={{ fontSize: 11, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Their Posts ({userPosts.length})</p>
@@ -494,6 +578,19 @@ function Row({ label, value, highlight, mono }: { label: string; value: string; 
     <div>
       <p style={{ fontSize: 11, color: "#555", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 3px" }}>{label}</p>
       <p style={{ fontSize: 13, color: highlight ? "#f59e0b" : "#ccc", margin: 0, fontFamily: mono ? "monospace" : "inherit", wordBreak: "break-all", lineHeight: 1.5 }}>{value}</p>
+    </div>
+  );
+}
+
+function EditField({ label, value, onChange, multiline }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) {
+  const style: React.CSSProperties = { width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #333", background: "#111", color: "#ddd", fontSize: 13, outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" };
+  return (
+    <div>
+      <p style={{ fontSize: 11, color: "#555", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 6px" }}>{label}</p>
+      {multiline
+        ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} style={style} />
+        : <input value={value} onChange={e => onChange(e.target.value)} style={style} />
+      }
     </div>
   );
 }
@@ -555,5 +652,17 @@ BEGIN
   END IF;
   UPDATE auth.users
   SET raw_user_meta_data = raw_user_meta_data || jsonb_build_object('is_admin', make_admin)
+  WHERE id = user_id;
+END; $$;
+
+CREATE OR REPLACE FUNCTION admin_update_user(user_id uuid, new_name text, new_email text)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  IF NOT (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean THEN
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+  UPDATE auth.users
+  SET email = new_email,
+      raw_user_meta_data = raw_user_meta_data || jsonb_build_object('full_name', new_name)
   WHERE id = user_id;
 END; $$;`;
