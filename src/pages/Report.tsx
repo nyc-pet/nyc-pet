@@ -214,8 +214,11 @@ export default function Report() {
       if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
     } catch {}
 
+    const contactName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0] || "Anonymous";
+
     const { data: inserted, error: insertError } = await supabase.from("pet_posts").insert({
       user_id:           user.id,
+      contact_name:      contactName,
       status:            draft.status,
       species:           draft.species,
       name:              draft.name,
