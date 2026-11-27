@@ -497,30 +497,40 @@ function SuccessScreen({ draft, postId, onMap, onView }: { draft: Draft; postId:
     <div style={{ minHeight:"100dvh", background:"#fff", display:"flex", flexDirection:"column" }}>
       <style>{`@keyframes popIn { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }`}</style>
 
-      {/* Header */}
-      <div style={{ padding:"52px 20px 0", display:"flex", alignItems:"center" }}>
-        <button onClick={onMap} style={{ width:40, height:40, borderRadius:20, background:"#f5f5f7", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <ArrowLeft size={18} color="#111" strokeWidth={2} />
+      {/* Dark hero with arch curve */}
+      <div style={{ background:"linear-gradient(160deg,#1a3a2a 0%,#2d6a4f 100%)", position:"relative", minHeight:220, display:"flex", flexDirection:"column", justifyContent:"flex-end", paddingBottom:44 }}>
+        {/* Back button */}
+        <button onClick={onMap} style={{ position:"absolute", top:52, left:20, width:40, height:40, borderRadius:20, background:"rgba(255,255,255,0.15)", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <ArrowLeft size={18} color="#fff" strokeWidth={2} />
         </button>
+
+        {/* Hero text */}
+        <div style={{ padding:"0 24px 0", textAlign:"center" }}>
+          <p style={{ fontSize:13, fontWeight:600, color:"rgba(255,255,255,0.6)", letterSpacing:1, textTransform:"uppercase", marginBottom:6 }}>NYC Pet</p>
+          <h2 style={{ fontSize:26, fontWeight:900, color:"#fff", lineHeight:1.2 }}>Report submitted</h2>
+        </div>
+
+        {/* Arch SVG */}
+        <svg style={{ position:"absolute", bottom:-1, left:0, width:"100%", display:"block" }}
+          viewBox="0 0 390 34" preserveAspectRatio="none" aria-hidden="true">
+          <path fill="#fff" d="M0 34 C0 15 15 0 34 0 H136 C159 0 175 28 195 28 C215 28 231 0 254 0 H356 C375 0 390 15 390 34 Z"/>
+        </svg>
       </div>
 
       {/* Content */}
-      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 28px 48px", textAlign:"center" }}>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"32px 24px 48px", textAlign:"center" }}>
 
         {/* Icon */}
-        <div style={{ width:100, height:100, borderRadius:50, background:"#f0fff4", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:28, animation:"popIn 0.5s cubic-bezier(.4,0,.2,1) both" }}>
-          <CheckCircle size={48} color="#16a34a" strokeWidth={1.5} />
+        <div style={{ width:88, height:88, borderRadius:44, background:"#f0fff4", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20, animation:"popIn 0.5s cubic-bezier(.4,0,.2,1) both", marginTop:-12 }}>
+          <CheckCircle size={44} color="#16a34a" strokeWidth={1.5} />
         </div>
 
-        <h1 style={{ fontSize:28, fontWeight:900, color:"#111", lineHeight:1.2, marginBottom:12 }}>
-          Report submitted!
-        </h1>
-        <p style={{ fontSize:15, color:"#666", lineHeight:1.7, maxWidth:300, marginBottom:32 }}>
-          {`${draft.name || "Your pet"}'s report is under review by our team. You'll be notified in-app once it's approved and live.`}
+        <p style={{ fontSize:15, color:"#666", lineHeight:1.7, maxWidth:300, marginBottom:28 }}>
+          {`${draft.name || "Your pet"}'s report is under review. You'll be notified here once it's approved and live.`}
         </p>
 
         {/* Status cards */}
-        <div style={{ width:"100%", display:"flex", flexDirection:"column", gap:10, marginBottom:36 }}>
+        <div style={{ width:"100%", display:"flex", flexDirection:"column", gap:10, marginBottom:32 }}>
           <div style={{ display:"flex", alignItems:"center", gap:14, padding:"14px 18px", background:"#fffbeb", borderRadius:16, border:"1px solid #fde68a" }}>
             <div style={{ width:36, height:36, borderRadius:12, background:"#fef3c7", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
               <Clock size={18} color="#b45309" strokeWidth={1.8} />
