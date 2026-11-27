@@ -78,14 +78,14 @@ export default function ReportGate({ onClose }: Props) {
       {/* Wave card */}
       <div style={{
         width: "min(420px, 100%)",
-        background: "#ffffff",
+        background: "linear-gradient(to bottom, #ffffff calc(100% - 80px), #111 calc(100% - 80px))",
         borderRadius: "32px",
         position: "relative",
         overflow: "hidden",
         color: "white",
         textAlign: "center",
         containerType: "inline-size",
-        paddingBottom: 0,
+        paddingBottom: 80,
       }}>
 
         {/* Content */}
