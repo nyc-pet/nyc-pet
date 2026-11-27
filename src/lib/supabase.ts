@@ -45,7 +45,6 @@ export interface PetPost {
   contact_name: string | null;
   contact_phone: string | null;
   contact_email: string | null;
-  reward: string | null;
   approved: boolean;
   user_id: string | null;
 }

@@ -179,7 +179,7 @@ export default function Admin() {
   function selectPost(post: PetPost) {
     setSelectedPost(selectedPost?.id === post.id ? null : post);
     setEditingPost(false);
-    setPostForm({ name: post.name, status: post.status, description: post.description, last_seen_address: post.last_seen_address, contact_name: post.contact_name, contact_phone: post.contact_phone, contact_email: post.contact_email, reward: post.reward });
+    setPostForm({ name: post.name, status: post.status, description: post.description, last_seen_address: post.last_seen_address, contact_name: post.contact_name, contact_phone: post.contact_phone, contact_email: post.contact_email });
   }
 
   // ── AUTH ERRORS ────────────────────────────────────────
@@ -448,7 +448,6 @@ export default function Admin() {
                   <EditField label="Contact Name" value={postForm.contact_name || ""} onChange={v => setPostForm(f => ({ ...f, contact_name: v }))} />
                   <EditField label="Contact Phone" value={postForm.contact_phone || ""} onChange={v => setPostForm(f => ({ ...f, contact_phone: v }))} />
                   <EditField label="Contact Email" value={postForm.contact_email || ""} onChange={v => setPostForm(f => ({ ...f, contact_email: v }))} />
-                  <EditField label="Reward" value={postForm.reward || ""} onChange={v => setPostForm(f => ({ ...f, reward: v }))} />
                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                     <button onClick={() => setEditingPost(false)} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#222", color: "#aaa", border: "1px solid #333", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><X size={14} /> Cancel</button>
                     <button onClick={savePost} disabled={saveLoading} style={{ flex: 1, padding: "10px", borderRadius: 10, background: "#fff", color: "#111", border: "none", fontSize: 13, fontWeight: 700, cursor: saveLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: saveLoading ? 0.7 : 1 }}><Save size={14} /> {saveLoading ? "Saving…" : "Save"}</button>
@@ -468,7 +467,6 @@ export default function Admin() {
                     <Row label="Contact Name" value={selectedPost.contact_name || "—"} />
                     <Row label="Contact Phone" value={selectedPost.contact_phone || "—"} />
                     <Row label="Contact Email" value={selectedPost.contact_email || "—"} />
-                    {selectedPost.reward && <Row label="Reward" value={selectedPost.reward} highlight />}
                     <Row label="Posted" value={new Date(selectedPost.created_at).toLocaleString()} />
                     <Row label="Post ID" value={selectedPost.id} mono />
                   </div>
