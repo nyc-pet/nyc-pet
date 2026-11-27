@@ -512,39 +512,30 @@ function SuccessScreen({ draft, postId, onMap, onView }: { draft: Draft; postId:
     <div style={{ minHeight:"100dvh", background:"#fff", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", textAlign:"center" }}>
       <style>{`@keyframes popIn { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }`}</style>
 
-      {/* Animated checkmark */}
-      <div style={{ width:96, height:96, borderRadius:48, background: isLost ? "#fff5f5" : "#f0fff4", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:24, animation:"popIn 0.5s cubic-bezier(.4,0,.2,1) both" }}>
-        <PartyPopper size={44} color={ isLost ? "#dc2626" : "#16a34a"} strokeWidth={1.5} />
+      {/* Animated icon */}
+      <div style={{ width:96, height:96, borderRadius:48, background:"#fffbeb", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:24, animation:"popIn 0.5s cubic-bezier(.4,0,.2,1) both" }}>
+        <PartyPopper size={44} color="#f59e0b" strokeWidth={1.5} />
       </div>
 
-      <h1 style={{ fontSize:32, fontWeight:900, color:"#111", lineHeight:1.2, marginBottom:10 }}>
-        {isLost ? "Report is live!" : "Thank you!"}
+      <h1 style={{ fontSize:28, fontWeight:900, color:"#111", lineHeight:1.2, marginBottom:10 }}>
+        Report submitted!
       </h1>
-      <p style={{ fontSize:15, color:"#666", lineHeight:1.7, maxWidth:280, marginBottom:8 }}>
-        {isLost
-          ? `We've posted ${draft.name || "your pet"}'s report. Our community will keep an eye out.`
-          : `Your found pet report is live. The owner may already be searching for them.`}
+      <p style={{ fontSize:15, color:"#666", lineHeight:1.7, maxWidth:300, marginBottom:12 }}>
+        {`Your report for ${draft.name || "this pet"} is under review. We'll notify you by email once it's approved and live.`}
       </p>
-      <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#f8faff", borderRadius:30, padding:"8px 16px", marginBottom:36 }}>
-        <MapPin size={13} color="#aaa" />
-        <span style={{ fontSize:13, color:"#888" }}>{draft.location}</span>
+
+      {/* Pending badge */}
+      <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#fffbeb", border:"1.5px solid #fcd34d", borderRadius:30, padding:"8px 18px", marginBottom:36 }}>
+        <span style={{ fontSize:18 }}>⏳</span>
+        <span style={{ fontSize:13, fontWeight:700, color:"#b45309" }}>Pending approval</span>
       </div>
 
       <div style={{ width:"100%", display:"flex", flexDirection:"column", gap:12 }}>
-        <button onClick={share}
-          style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"center", gap:10, padding:"16px", background:"#111", color:"#fff", borderRadius:16, fontSize:15, fontWeight:700 }}>
-          <Share2 size={18} strokeWidth={2} /> Share this report
-        </button>
-        {postId && (
-          <button onClick={onView}
-            style={{ width:"100%", padding:"16px", background:"#f5f5f7", color:"#111", borderRadius:16, fontSize:15, fontWeight:700 }}>
-            View Report
-          </button>
-        )}
         <button onClick={onMap}
-          style={{ width:"100%", padding:"16px", background:"transparent", color:"#aaa", borderRadius:16, fontSize:14, fontWeight:600 }}>
-          Back to Map
+          style={{ width:"100%", padding:"16px", background:"#111", color:"#fff", borderRadius:16, fontSize:15, fontWeight:700 }}>
+          Back to Home
         </button>
+        <p style={{ fontSize:12, color:"#bbb", textAlign:"center" }}>You'll get an email once your post goes live</p>
       </div>
     </div>
   );
