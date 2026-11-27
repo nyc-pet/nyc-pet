@@ -207,7 +207,7 @@ export default function Report() {
       if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
     } catch {}
 
-    const { data: inserted } = await supabase.from("pet_posts").insert({
+    const { data: inserted, error: insertError } = await supabase.from("pet_posts").insert({
       user_id:           user.id,
       status:            draft.status,
       species:           draft.species,
@@ -223,6 +223,12 @@ export default function Report() {
       photo_url_3:       urls[2],
       photo_url_4:       urls[3],
     }).select("id").single();
+
+    if (insertError) {
+      alert("Failed to submit report: " + insertError.message);
+      setSubmitting(false);
+      return;
+    }
 
     // Clear saved draft
     localStorage.removeItem("nyc-pet-draft");
