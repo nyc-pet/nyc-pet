@@ -80,11 +80,10 @@ export default function ReportGate({ onClose }: Props) {
         background: "#171716",
         borderRadius: "48px 48px 0 0",
         position: "relative",
-        overflow: "hidden",
         color: "white",
         textAlign: "center",
         containerType: "inline-size",
-        paddingBottom: 72,
+        paddingBottom: "env(safe-area-inset-bottom, 16px)",
       }}>
 
         {/* Content */}
@@ -209,56 +208,38 @@ export default function ReportGate({ onClose }: Props) {
           </label>
 
           {/* Dots */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: "4cqw" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: "5cqw" }}>
             {SLIDES.map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 26, height: 4,
-                  borderRadius: 9,
-                  background: i === step ? "#f5f5f5" : "#737373",
-                  transition: "background 0.2s",
-                }}
-              />
+              <div key={i} style={{ width: 26, height: 4, borderRadius: 9, background: i === step ? "#f5f5f5" : "#737373", transition: "background 0.2s" }} />
             ))}
           </div>
+
+          {/* Continue button — in flow, not floating */}
+          <button
+            onClick={next}
+            disabled={!checked}
+            style={{
+              width: "100%",
+              padding: "16px",
+              borderRadius: 16,
+              border: "none",
+              background: checked ? "#f5f5f5" : "#2a2a2a",
+              color: checked ? "#111" : "#555",
+              fontSize: "3.8cqw",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              cursor: checked ? "pointer" : "default",
+              transition: "background 0.25s, color 0.25s",
+              marginBottom: "4cqw",
+            }}
+          >
+            {step < SLIDES.length - 1 ? "Continue" : "Get Started"}
+            <ArrowRight size={16} strokeWidth={2.2} />
+          </button>
         </div>
-
-        {/* Wave SVG */}
-        <svg
-          style={{ position: "absolute", bottom: 0, left: 0, width: "100%", display: "block" }}
-          viewBox="0 0 386 61"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path fill="white" d="M0 59 H91 C121 59 145 38 167 15 C176 5 183 1 193 1 C204 1 212 5 221 15 C243 38 267 59 297 59 H386 V61 H0 Z"/>
-        </svg>
-
-        {/* Round arrow button in wave */}
-        <button
-          onClick={next}
-          disabled={!checked}
-          style={{
-            position: "absolute",
-            bottom: 6,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 52,
-            height: 52,
-            borderRadius: "50%",
-            border: "none",
-            background: checked ? "#111" : "#d4d4d4",
-            color: checked ? "#fff" : "#555",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: checked ? "pointer" : "default",
-            transition: "background 0.25s, color 0.25s",
-            boxShadow: checked ? "0 4px 16px rgba(0,0,0,0.3)" : "none",
-          }}
-        >
-          <ArrowRight size={20} strokeWidth={2.2} />
-        </button>
       </div>
     </div>
   );
