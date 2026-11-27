@@ -80,7 +80,7 @@ export default function ReportGate({ onClose }: Props) {
         width: "min(420px, 100%)",
         background: "#171716",
         borderRadius: "32px",
-        border: "4px solid rgba(255,255,255,0.85)",
+        border: "1px solid rgba(255,255,255,0.85)",
         position: "relative",
         overflow: "hidden",
         color: "white",
