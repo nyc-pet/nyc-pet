@@ -104,7 +104,7 @@ export default function MapPage() {
       attribution: '© <a href="https://stadiamaps.com/">Stadia Maps</a>',
       maxZoom: 20,
     }).addTo(map);
-    // zoom control handled by custom buttons
+    L.control.zoom({ position: "bottomleft" }).addTo(map);
     mapInstance.current = map;
     setMapReady(true);
     return () => { map.remove(); mapInstance.current = null; setMapReady(false); };
@@ -265,22 +265,6 @@ export default function MapPage() {
 
         {/* Map controls — bottom left stack */}
         <div style={{ position: "absolute", bottom: 150, left: 16, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
-          {/* Zoom In */}
-          <button onClick={() => mapInstance.current?.zoomIn()} style={{
-            width: 44, height: 44, borderRadius: 22,
-            background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 22, fontWeight: 300, color: "#1c314e", border: "none", cursor: "pointer",
-          }}>+</button>
-
-          {/* Zoom Out */}
-          <button onClick={() => mapInstance.current?.zoomOut()} style={{
-            width: 44, height: 44, borderRadius: 22,
-            background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 22, fontWeight: 300, color: "#1c314e", border: "none", cursor: "pointer",
-          }}>−</button>
-
           {/* Dark/Light toggle */}
           <button onClick={toggleMapStyle} style={{
             width: 44, height: 44, borderRadius: 22,
@@ -374,6 +358,10 @@ export default function MapPage() {
         @keyframes ping { 0% { transform:translate(-50%,-50%) scale(1); opacity:0.4; } 100% { transform:translate(-50%,-50%) scale(2.5); opacity:0; } }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
         @keyframes slideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
+        .leaflet-bottom.leaflet-left { bottom: 150px !important; left: 16px !important; z-index: 1000 !important; }
+        .leaflet-control-zoom { border-radius: 22px !important; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important; border: none !important; }
+        .leaflet-control-zoom a { width: 44px !important; height: 44px !important; line-height: 44px !important; font-size: 20px !important; color: #1c314e !important; background: #fff !important; border: none !important; }
+        .leaflet-control-zoom-in { border-bottom: 1px solid #eee !important; }
       `}</style>
     </div>
   );
