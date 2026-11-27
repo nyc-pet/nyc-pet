@@ -4,7 +4,7 @@ import { ShieldCheck, FileText, AlertTriangle, ArrowRight, Check, ChevronDown, C
 
 const SLIDES = [
   {
-    icon: <ShieldCheck size={28} color="#f5f5f5" strokeWidth={1.6} />,
+    icon: <ShieldCheck size={28} color="#111" strokeWidth={1.6} />,
     title: "Safety First",
     body: "Always meet in a safe, public place when reuniting a pet. Never share your home address or personal financial info with strangers.",
     linkLabel: "Read our Safety Tips",
@@ -19,7 +19,7 @@ const SLIDES = [
     label: "I understand, keep me safe",
   },
   {
-    icon: <FileText size={28} color="#f5f5f5" strokeWidth={1.6} />,
+    icon: <FileText size={28} color="#111" strokeWidth={1.6} />,
     title: "Our Terms Apply",
     body: "By posting you agree to our Terms of Service and Privacy Policy. Keep your post honest and accurate — false reports will be removed.",
     linkLabel: "View Terms & Privacy",
@@ -34,7 +34,7 @@ const SLIDES = [
     label: "I agree to the Terms of Service",
   },
   {
-    icon: <AlertTriangle size={28} color="#f5f5f5" strokeWidth={1.6} />,
+    icon: <AlertTriangle size={28} color="#111" strokeWidth={1.6} />,
     title: "Important Disclaimer",
     body: "nyc.pet connects pet owners and finders but is not responsible for any interactions, meetings, or outcomes between users. Post at your own discretion.",
     linkLabel: null,
@@ -78,7 +78,7 @@ export default function ReportGate({ onClose }: Props) {
       {/* Wave card */}
       <div style={{
         width: "min(420px, 100%)",
-        background: "#171716",
+        background: "#ffffff",
         borderRadius: "32px",
         position: "relative",
         overflow: "hidden",
@@ -103,7 +103,7 @@ export default function ReportGate({ onClose }: Props) {
             letterSpacing: "-0.045em",
             fontWeight: 500,
             margin: "0 0 3cqw",
-            color: "#f5f5f5",
+            color: "#111",
           }}>
             {slide.title}
           </h1>
@@ -112,7 +112,7 @@ export default function ReportGate({ onClose }: Props) {
           <p style={{
             fontSize: "3.35cqw",
             lineHeight: 1.6,
-            color: "#a6a6a6",
+            color: "#666",
             margin: 0,
           }}>
             {slide.body}
@@ -124,11 +124,11 @@ export default function ReportGate({ onClose }: Props) {
               <button
                 onClick={() => setExpanded(!expanded)}
                 style={{
-                  background: "rgba(255,255,255,0.07)",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "#f5f5f7",
+                  border: "1px solid #e2e8f0",
                   borderRadius: 24,
                   padding: "2cqw 4cqw",
-                  color: "#c8d8ff",
+                  color: "#1c314e",
                   fontSize: "3.1cqw",
                   display: "flex",
                   alignItems: "center",
@@ -150,7 +150,7 @@ export default function ReportGate({ onClose }: Props) {
                   listStyle: "none",
                   margin: "3cqw 0 0",
                   padding: "3cqw",
-                  background: "rgba(255,255,255,0.05)",
+                  background: "#f8faff",
                   borderRadius: 16,
                   textAlign: "left",
                   display: "flex",
@@ -160,7 +160,7 @@ export default function ReportGate({ onClose }: Props) {
                   {slide.linkContent.map((item, i) => (
                     <li key={i} style={{
                       fontSize: "3.1cqw",
-                      color: "#b0b0b0",
+                      color: "#555",
                       lineHeight: 1.5,
                     }}>
                       {item}
@@ -190,8 +190,8 @@ export default function ReportGate({ onClose }: Props) {
                 minWidth: 20,
                 minHeight: 20,
                 borderRadius: "1.2cqw",
-                border: checked ? "none" : "2px solid #555",
-                background: checked ? "#f5f5f5" : "transparent",
+                border: checked ? "none" : "2px solid #ccc",
+                background: checked ? "#111" : "transparent",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -199,11 +199,11 @@ export default function ReportGate({ onClose }: Props) {
                 transition: "background 0.2s, border 0.2s",
               }}
             >
-              {checked && <Check size={12} color="#171716" strokeWidth={3} />}
+              {checked && <Check size={12} color="#fff" strokeWidth={3} />}
             </span>
             <span
               onClick={() => setChecked(!checked)}
-              style={{ fontSize: "3.1cqw", color: "#c0c0c0", textAlign: "left", lineHeight: 1.4 }}
+              style={{ fontSize: "3.1cqw", color: "#444", textAlign: "left", lineHeight: 1.4 }}
             >
               {slide.label}
             </span>
@@ -212,7 +212,7 @@ export default function ReportGate({ onClose }: Props) {
           {/* Dots */}
           <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: "8cqw" }}>
             {SLIDES.map((_, i) => (
-              <div key={i} style={{ width: 26, height: 4, borderRadius: 9, background: i === step ? "#f5f5f5" : "#737373", transition: "background 0.2s" }} />
+              <div key={i} style={{ width: 26, height: 4, borderRadius: 9, background: i === step ? "#111" : "#ddd", transition: "background 0.2s" }} />
             ))}
           </div>
 
@@ -225,7 +225,7 @@ export default function ReportGate({ onClose }: Props) {
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path fill="white" d="M0 59 H91 C121 59 145 38 167 15 C176 5 183 1 193 1 C204 1 212 5 221 15 C243 38 267 59 297 59 H386 V61 H0 Z"/>
+          <path fill="#f5f5f7" d="M0 59 H91 C121 59 145 38 167 15 C176 5 183 1 193 1 C204 1 212 5 221 15 C243 38 267 59 297 59 H386 V61 H0 Z"/>
         </svg>
 
         {/* Round arrow button — sits in the wave peak, above home bar */}
