@@ -46,7 +46,7 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
         src="/logo.png"
         alt="nyc.pet"
         style={{
-          height: 60,
+          height: 100,
           filter: "brightness(0) invert(1)",
           opacity: fading ? 0 : 1,
           transform: fading ? "scale(0.95)" : "scale(1)",
