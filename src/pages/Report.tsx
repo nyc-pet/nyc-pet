@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Camera, MapPin, Navigation,
-  Edit2, Pencil, CheckCircle, HeartCrack, Heart, X, Plus,
+  Edit2, Pencil, SquarePen, CheckCircle, HeartCrack, Heart, X, Plus,
   Dog, Cat, Bird, Fish, Rabbit, HelpCircle, MessageCircle, Phone, Lock, Mail,
   Share2, PartyPopper, RefreshCw,
 } from "lucide-react";
@@ -995,7 +995,7 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
           <p style={{ fontSize: 14, color: "#888", marginTop: 4, margin: 0 }}>{[draft.species, draft.breed].filter(Boolean).join(" · ")}</p>
         </div>
         <button onClick={() => jumpTo("name")} style={{ width: 34, height: 34, borderRadius: 12, background: "#f0f0f0", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-          <Pencil size={14} color="#333" strokeWidth={1.8} />
+          <SquarePen size={14} color="#333" strokeWidth={1.8} />
         </button>
       </div>
 
@@ -1013,7 +1013,7 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
               <p style={{ fontSize: 14, color: "#333", marginTop: 3, margin: 0 }}>{r.value}</p>
             </div>
             <button onClick={() => jumpTo(r.step)} style={{ width: 28, height: 28, borderRadius: 8, background: "#f0f0f0", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-              <Pencil size={12} color="#333" strokeWidth={1.8} />
+              <SquarePen size={12} color="#333" strokeWidth={1.8} />
             </button>
           </div>
         ))}
@@ -1025,7 +1025,7 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <p style={{ fontSize: 11, color: "#bbb", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 6px" }}>Notes</p>
             <button onClick={() => jumpTo("appearance")} style={{ width: 28, height: 28, borderRadius: 8, background: "#f0f0f0", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-              <Pencil size={12} color="#333" strokeWidth={1.8} />
+              <SquarePen size={12} color="#333" strokeWidth={1.8} />
             </button>
           </div>
           <p style={{ fontSize: 14, color: "#333", margin: 0, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{draft.notes}</p>
