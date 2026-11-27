@@ -98,7 +98,8 @@ export default function Admin() {
   async function deletePost(id: string) {
     if (!confirm("Permanently delete this post?")) return;
     setActionLoading(id + "_delete");
-    await supabase.from("pet_posts").delete().eq("id", id);
+    const { error } = await supabase.from("pet_posts").delete().eq("id", id);
+    if (error) { alert("Delete failed: " + error.message); setActionLoading(null); return; }
     setPosts(ps => ps.filter(p => p.id !== id));
     setPostStats(s => ({ ...s, total: s.total - 1 }));
     if (selectedPost?.id === id) setSelectedPost(null);
