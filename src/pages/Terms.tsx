@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import InfoPage from "../components/InfoPage";
 
 export default function Terms() {
@@ -74,7 +75,7 @@ export default function Terms() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 24 }}>
       <h2 style={{ fontSize: 15, fontWeight: 800, color: "#111", marginBottom: 8 }}>{title}</h2>

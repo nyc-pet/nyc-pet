@@ -34,7 +34,7 @@ export default function Saved() {
       .select("id, pet_post_id, pet_posts(*)")
       .eq("user_id", uid)
       .order("created_at", { ascending: false });
-    setSaved((data as SavedRow[]) || []);
+    setSaved((data as unknown as SavedRow[]) || []);
     setLoading(false);
   }
 
