@@ -23,6 +23,7 @@ interface Draft {
   photos:   (File | null)[];
   previews: (string | null)[];
   location:        string;
+  borough:         string;
   date:            string;
   notes:           string;
   phone:           string;
@@ -42,7 +43,7 @@ interface Draft {
 const BLANK: Draft = {
   status: null, species: null, name: "", breed: "", color: "",
   size: null, photos: [null,null,null,null], previews: [null,null,null,null],
-  location: "", date: new Date().toISOString().split("T")[0], notes: "",
+  location: "", borough: "", date: new Date().toISOString().split("T")[0], notes: "",
   phone: "", phoneEnabled: false,
   email: "", emailEnabled: false,
   facebook: "", facebookEnabled: false,
@@ -222,6 +223,7 @@ export default function Report() {
       color:             draft.color || null,
       description:       draft.notes || null,
       last_seen_address: draft.location,
+      borough:           draft.borough,
       last_seen_date:    draft.date || new Date().toISOString().split("T")[0],
       lat,
       lng,
@@ -253,7 +255,7 @@ export default function Report() {
     if (step === "name")       return draft.name.trim().length > 0;
     if (step === "appearance") return true; // optional
     if (step === "photos")     return true; // optional
-    if (step === "location")   return draft.location.trim().length > 0;
+    if (step === "location")   return draft.location.trim().length > 0 && draft.borough.trim().length > 0 && draft.borough !== "__other__";
     return true;
   }
 
@@ -747,9 +749,49 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
         </button>
       </div>
 
+      {/* Borough picker */}
+      {(() => {
+        const BOROUGHS = ["Manhattan","Brooklyn","Queens","The Bronx","Staten Island"];
+        const isOther = draft.borough !== "" && !BOROUGHS.includes(draft.borough);
+        const showOtherInput = isOther || draft.borough === "__other__";
+        return (
+          <div>
+            <p style={{ fontSize:13, fontWeight:700, color:"#555", marginBottom:8 }}>Borough</p>
+            <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom: showOtherInput ? 10 : 0 }}>
+              {BOROUGHS.map(b => (
+                <button key={b} onClick={() => setDraft(d => ({ ...d, borough: b }))}
+                  style={{ padding:"9px 16px", borderRadius:30, fontSize:13, fontWeight:600, border:"none", cursor:"pointer",
+                    background: draft.borough === b ? "#111" : "#f0f0f0",
+                    color: draft.borough === b ? "#fff" : "#555",
+                  }}>
+                  {b}
+                </button>
+              ))}
+              <button onClick={() => setDraft(d => ({ ...d, borough: "__other__" }))}
+                style={{ padding:"9px 16px", borderRadius:30, fontSize:13, fontWeight:600, border:"none", cursor:"pointer",
+                  background: showOtherInput ? "#111" : "#f0f0f0",
+                  color: showOtherInput ? "#fff" : "#555",
+                }}>
+                Other
+              </button>
+            </div>
+            {showOtherInput && (
+              <input
+                autoFocus
+                type="text"
+                placeholder="Type your borough or area…"
+                value={isOther ? draft.borough : ""}
+                onChange={e => setDraft(d => ({ ...d, borough: e.target.value || "__other__" }))}
+                style={{ width:"100%", padding:"14px 16px", background:"#f5f5f7", borderRadius:16, fontSize:15, color:"#111", border:"none", outline:"none", boxSizing:"border-box" }}
+              />
+            )}
+          </div>
+        );
+      })()}
+
       {/* Date picker */}
       <div>
-        <p style={{ fontSize:13, fontWeight:700, color:"#555", marginBottom:8 }}>📅 Last seen date</p>
+        <p style={{ fontSize:13, fontWeight:700, color:"#555", marginBottom:8 }}>Last seen date</p>
         <input
           type="date"
           value={draft.date}
@@ -1004,6 +1046,7 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
         {[
           { label: "Color",    value: draft.color,    step: "appearance" as StepKey },
           { label: "Size",     value: draft.size,     step: "appearance" as StepKey },
+          { label: "Borough",  value: draft.borough,  step: "location" as StepKey },
           { label: "Location", value: draft.location, step: "location" as StepKey },
           { label: "Date",     value: draft.date,     step: "location" as StepKey },
         ].filter(r => r.value).map((r, i, arr) => (
