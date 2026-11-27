@@ -1032,6 +1032,60 @@ function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => 
         </div>
       )}
 
+      {/* Contact methods */}
+      {(() => {
+        const contacts = [
+          draft.phoneEnabled    && draft.phone    && { icon: "📞", label: "Phone",     value: draft.phone },
+          draft.emailEnabled    && draft.email    && { icon: "✉️",  label: "Email",     value: draft.email },
+          draft.facebookEnabled && draft.facebook && { icon: "👥", label: "Facebook",  value: draft.facebook },
+          draft.instagramEnabled && draft.instagram && { icon: "📸", label: "Instagram", value: draft.instagram },
+          draft.tiktokEnabled   && draft.tiktok   && { icon: "🎵", label: "TikTok",    value: draft.tiktok },
+          draft.twitterEnabled  && draft.twitter  && { icon: "𝕏",  label: "X / Twitter", value: draft.twitter },
+        ].filter(Boolean) as { icon: string; label: string; value: string }[];
+
+        if (contacts.length === 0) return (
+          <div style={{ background: "#fafafa", borderRadius: 18, padding: "14px 16px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <p style={{ fontSize: 11, color: "#bbb", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: 0 }}>Contact</p>
+              <p style={{ fontSize: 13, color: "#aaa", marginTop: 3, margin: 0 }}>In-app messaging only</p>
+            </div>
+            <button onClick={() => jumpTo("contact")} style={{ width: 28, height: 28, borderRadius: 8, background: "#f0f0f0", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <SquarePen size={12} color="#333" strokeWidth={1.8} />
+            </button>
+          </div>
+        );
+
+        return (
+          <div style={{ background: "#fafafa", borderRadius: 18, overflow: "hidden", marginBottom: 20 }}>
+            <div style={{ padding: "12px 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <p style={{ fontSize: 11, color: "#bbb", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: 0 }}>Contact Options</p>
+              <button onClick={() => jumpTo("contact")} style={{ width: 28, height: 28, borderRadius: 8, background: "#f0f0f0", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <SquarePen size={12} color="#333" strokeWidth={1.8} />
+              </button>
+            </div>
+            <div style={{ padding: "0 16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+              {/* In-app messaging always shown */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: "#111", borderRadius: 12 }}>
+                <span style={{ fontSize: 16 }}>💬</span>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: 0 }}>In-app Message</p>
+                  <p style={{ fontSize: 11, color: "#aaa", margin: 0 }}>Default · always enabled</p>
+                </div>
+              </div>
+              {contacts.map(c => (
+                <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: "#fff", borderRadius: 12, border: "1px solid #f0f0f0" }}>
+                  <span style={{ fontSize: 16 }}>{c.icon}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 11, color: "#bbb", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, margin: 0 }}>{c.label}</p>
+                    <p style={{ fontSize: 13, color: "#333", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Edit hint */}
       <p style={{ fontSize: 12, color: "#bbb", textAlign: "center", marginBottom: 8 }}>Tap ✏️ on any section to edit</p>
     </div>
