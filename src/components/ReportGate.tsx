@@ -208,37 +208,32 @@ export default function ReportGate({ onClose }: Props) {
           </label>
 
           {/* Dots */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: "5cqw" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: "8cqw" }}>
             {SLIDES.map((_, i) => (
               <div key={i} style={{ width: 26, height: 4, borderRadius: 9, background: i === step ? "#f5f5f5" : "#737373", transition: "background 0.2s" }} />
             ))}
           </div>
 
-          {/* Continue button — in flow, not floating */}
-          <button
-            onClick={next}
-            disabled={!checked}
-            style={{
-              width: "100%",
-              padding: "16px",
-              borderRadius: 16,
-              border: "none",
-              background: checked ? "#f5f5f5" : "#2a2a2a",
-              color: checked ? "#111" : "#555",
-              fontSize: "3.8cqw",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              cursor: checked ? "pointer" : "default",
-              transition: "background 0.25s, color 0.25s",
-              marginBottom: "4cqw",
-            }}
-          >
-            {step < SLIDES.length - 1 ? "Continue" : "Get Started"}
-            <ArrowRight size={16} strokeWidth={2.2} />
-          </button>
+          {/* Round arrow button — centred in the card, well above home bar */}
+          <div style={{ display: "flex", justifyContent: "center", paddingBottom: "8cqw" }}>
+            <button
+              onClick={next}
+              disabled={!checked}
+              style={{
+                width: 56, height: 56,
+                borderRadius: "50%",
+                border: "none",
+                background: checked ? "#f5f5f5" : "#2a2a2a",
+                color: checked ? "#111" : "#666",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: checked ? "pointer" : "default",
+                transition: "background 0.25s, color 0.25s",
+                boxShadow: checked ? "0 4px 20px rgba(255,255,255,0.15)" : "none",
+              }}
+            >
+              <ArrowRight size={22} strokeWidth={2.2} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
