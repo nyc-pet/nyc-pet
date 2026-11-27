@@ -6,7 +6,7 @@ import {
   Dog, Cat, Bird, Fish, Rabbit, HelpCircle, MessageCircle, Phone, Lock, Mail,
   Share2, PartyPopper, RefreshCw, Clock, Bell, Home, Map as MapIcon, Keyboard,
 } from "lucide-react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -772,9 +772,33 @@ function MapClickHandler({ onPick }: { onPick: (lat: number, lng: number) => voi
   return null;
 }
 
+function MapFlyTo({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => { map.flyTo([lat, lng], 15, { animate: true, duration: 1 }); }, [lat, lng]);
+  return null;
+}
+
 function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft: React.Dispatch<React.SetStateAction<Draft>>; getLocation: () => void }) {
   const [mapMode, setMapMode] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null);
+
+  async function searchLocation() {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", New York")}&format=json&limit=1`);
+      const data = await res.json();
+      if (data[0]) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        setFlyTarget({ lat, lng });
+      }
+    } catch {}
+    setSearching(false);
+  }
 
   async function handleMapPick(lat: number, lng: number) {
     setGeocoding(true);
@@ -823,19 +847,42 @@ function LocationStep({ draft, setDraft, getLocation }: { draft: Draft; setDraft
 
       {mapMode ? (
         /* ── Map picker ── */
-        <div style={{ borderRadius:16, overflow:"hidden", border:"1.5px solid #e5e7eb" }}>
-          <MapContainer center={center} zoom={13} style={{ height:280, width:"100%" }} zoomControl={false}>
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="" />
-            <MapClickHandler onPick={handleMapPick} />
-            {draft.lat && draft.lng && <Marker position={[draft.lat, draft.lng]} icon={markerIcon} />}
-          </MapContainer>
-          <div style={{ padding:"10px 14px", background:"#f8faff", display:"flex", alignItems:"center", gap:8 }}>
-            {geocoding
-              ? <><RefreshCw size={13} color="#aaa" style={{ animation:"spin 1s linear infinite" }} /><span style={{ fontSize:12, color:"#aaa" }}>Getting address…</span></>
-              : draft.location
-                ? <><MapPin size={13} color="#16a34a" /><span style={{ fontSize:12, color:"#444", flex:1 }}>{draft.location}</span></>
-                : <span style={{ fontSize:12, color:"#aaa" }}>Tap anywhere on the map to drop a pin</span>
-            }
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {/* Zip / address search */}
+          <div style={{ display:"flex", gap:8 }}>
+            <div style={{ flex:1, position:"relative" }}>
+              <input
+                type="text"
+                placeholder="Search zip code or address…"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && searchLocation()}
+                style={{ width:"100%", padding:"12px 14px", background:"#f5f5f7", borderRadius:12, fontSize:14, color:"#111", border:"none", outline:"none", boxSizing:"border-box" }}
+              />
+            </div>
+            <button onClick={searchLocation} disabled={searching}
+              style={{ padding:"12px 16px", background:"#111", borderRadius:12, border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:6, color:"#fff", fontSize:13, fontWeight:600, flexShrink:0 }}>
+              {searching ? <RefreshCw size={14} style={{ animation:"spin 1s linear infinite" }} /> : <MapPin size={14} />}
+              Go
+            </button>
+          </div>
+
+          {/* Map */}
+          <div style={{ borderRadius:16, overflow:"hidden", border:"1.5px solid #e5e7eb" }}>
+            <MapContainer center={center} zoom={13} style={{ height:260, width:"100%" }} zoomControl={false}>
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="" />
+              <MapClickHandler onPick={handleMapPick} />
+              {flyTarget && <MapFlyTo lat={flyTarget.lat} lng={flyTarget.lng} />}
+              {draft.lat && draft.lng && <Marker position={[draft.lat, draft.lng]} icon={markerIcon} />}
+            </MapContainer>
+            <div style={{ padding:"10px 14px", background:"#f8faff", display:"flex", alignItems:"center", gap:8 }}>
+              {geocoding
+                ? <><RefreshCw size={13} color="#aaa" style={{ animation:"spin 1s linear infinite" }} /><span style={{ fontSize:12, color:"#aaa" }}>Getting address…</span></>
+                : draft.location
+                  ? <><MapPin size={13} color="#16a34a" /><span style={{ fontSize:12, color:"#444", flex:1 }}>{draft.location}</span></>
+                  : <span style={{ fontSize:12, color:"#aaa" }}>Tap anywhere on the map to drop a pin</span>
+              }
+            </div>
           </div>
         </div>
       ) : (
