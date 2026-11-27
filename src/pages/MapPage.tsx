@@ -98,7 +98,7 @@ export default function MapPage() {
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
-    const map = L.map(mapRef.current, { center: NYC, zoom: 11, zoomControl: false });
+    const map = L.map(mapRef.current, { center: NYC, zoom: 10, zoomControl: false });
     tileLayer.current = L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=cb880819-d09f-4838-8fa3-7699c1548cf0", {
       attribution: '© <a href="https://stadiamaps.com/">Stadia Maps</a>',
       maxZoom: 20,
