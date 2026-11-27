@@ -20,6 +20,7 @@ import SafetyTips from "./pages/SafetyTips";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Admin from "./pages/Admin";
+import ResetPassword from "./pages/ResetPassword";
 
 function SplashScreen({ onDone }: { onDone: () => void }) {
   const [fading, setFading] = useState(false);
@@ -80,7 +81,7 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
 
 function AppShell() {
   const location = useLocation();
-  const noNav = ["/login", "/report", "/about", "/how-to-help", "/success-stories", "/contact", "/safety-tips", "/terms", "/privacy", "/admin"].includes(location.pathname) || location.pathname.startsWith("/pet/") || location.pathname.startsWith("/chat/");
+  const noNav = ["/login", "/report", "/about", "/how-to-help", "/success-stories", "/contact", "/safety-tips", "/terms", "/privacy", "/admin", "/reset-password"].includes(location.pathname) || location.pathname.startsWith("/pet/") || location.pathname.startsWith("/chat/");
 
   return (
     <>
@@ -102,6 +103,7 @@ function AppShell() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
       {!noNav && <BottomNav />}
       <GlobalMenu />

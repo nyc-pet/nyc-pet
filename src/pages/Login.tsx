@@ -21,7 +21,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true); setError(""); setSuccess("");
     if (mode === "reset") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
       if (error) { setError(error.message); setLoading(false); return; }
       setSuccess("Check your email for a password reset link!");
       setLoading(false);
