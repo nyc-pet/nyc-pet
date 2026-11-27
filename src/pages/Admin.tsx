@@ -548,7 +548,7 @@ export default function Admin() {
               )}
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {selectedUser.raw_user_meta_data?.is_admin && (
+                {!!selectedUser.raw_user_meta_data?.is_admin && (
                   <button onClick={() => toggleAdmin(selectedUser.id, false)} style={{ padding: "10px", borderRadius: 10, background: "#2a1a3a", color: "#c084fc", border: "1px solid #3a2a4a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Remove Admin</button>
                 )}
                 <button onClick={() => deleteUser(selectedUser.id, selectedUser.email)} style={{ padding: "10px", borderRadius: 10, background: "#3a1a1a", color: "#ff3b30", border: "1px solid #4a2a2a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Delete User & All Data</button>
