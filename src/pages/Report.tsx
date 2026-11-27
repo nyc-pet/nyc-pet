@@ -115,10 +115,15 @@ export default function Report() {
   }, [isLoggedIn]);
 
   /* ── Save draft to localStorage on every change ── */
+  const [draftSaved, setDraftSaved] = useState(false);
+  const draftSavedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!isLoggedIn) return;
     const { photos, previews, ...saveable } = draft;
     localStorage.setItem("nyc-pet-draft", JSON.stringify({ ...saveable, _step: stepIdx }));
+    setDraftSaved(true);
+    if (draftSavedTimer.current) clearTimeout(draftSavedTimer.current);
+    draftSavedTimer.current = setTimeout(() => setDraftSaved(false), 2500);
   }, [draft, stepIdx, isLoggedIn]);
 
   const step = STEPS[stepIdx];
@@ -360,6 +365,19 @@ export default function Report() {
       <div style={{ background:"#fff", borderRadius:0, marginTop:-1, minHeight:"calc(100dvh - 180px)", position:"relative", zIndex:1 }}>
         <div style={{ display:"flex", justifyContent:"center", paddingTop:12, marginBottom:4 }}>
           <div style={{ width:36, height:4, borderRadius:2, background:"#e2e8f0" }} />
+        </div>
+
+        {/* Draft saved toast */}
+        <div style={{
+          position: "fixed", top: 16, left: "50%", transform: `translateX(-50%) translateY(${draftSaved ? 0 : -80}px)`,
+          background: "#111", color: "#fff", borderRadius: 30, padding: "8px 18px",
+          fontSize: 13, fontWeight: 600, zIndex: 9999,
+          display: "flex", alignItems: "center", gap: 7,
+          transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+          pointerEvents: "none", whiteSpace: "nowrap",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+        }}>
+          <span style={{ fontSize: 14 }}>✓</span> Draft saved
         </div>
 
         {/* Draft restored banner */}
