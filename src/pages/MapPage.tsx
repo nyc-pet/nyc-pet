@@ -8,7 +8,7 @@ import type { PetPost } from "../lib/supabase";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const NYC = [40.7128, -74.006] as [number, number];
+const NYC = [40.700, -73.900] as [number, number];
 
 function makePinIcon(color: string) {
   return L.divIcon({
