@@ -264,7 +264,7 @@ export default function MapPage() {
         <div ref={mapRef} className={showMenu ? "menu-open" : ""} style={{ width: "100%", height: "100%" }} />
 
         {/* Map controls — bottom left stack */}
-        <div style={{ position: "absolute", bottom: 130, left: 16, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ position: "absolute", bottom: 170, left: 16, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
           {/* Dark/Light toggle */}
           <button onClick={toggleMapStyle} style={{
             width: 44, height: 44, borderRadius: 22,
