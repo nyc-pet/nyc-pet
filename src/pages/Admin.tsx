@@ -401,10 +401,7 @@ export default function Admin() {
                           </td>
                           <td style={{ padding: "10px 16px" }} onClick={e => e.stopPropagation()}>
                             <div style={{ display: "flex", gap: 6 }}>
-                              {isAdmin
-                                ? <ActionBtn icon={<ShieldOff size={14} />} onClick={() => toggleAdmin(user.id, false)} title="Remove Admin" color="yellow" disabled={actionLoading === "admin_" + user.id} />
-                                : <ActionBtn icon={<ShieldCheck size={14} />} onClick={() => toggleAdmin(user.id, true)} title="Make Admin" disabled={actionLoading === "admin_" + user.id} />
-                              }
+                              {isAdmin && <ActionBtn icon={<ShieldOff size={14} />} onClick={() => toggleAdmin(user.id, false)} title="Remove Admin" color="yellow" disabled={actionLoading === "admin_" + user.id} />}
                               <ActionBtn icon={<Trash2 size={14} />} onClick={() => deleteUser(user.id, user.email)} title="Delete User" color="red" disabled={actionLoading === "user_" + user.id} />
                             </div>
                           </td>
@@ -551,10 +548,9 @@ export default function Admin() {
               )}
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {selectedUser.raw_user_meta_data?.is_admin
-                  ? <button onClick={() => toggleAdmin(selectedUser.id, false)} style={{ padding: "10px", borderRadius: 10, background: "#2a1a3a", color: "#c084fc", border: "1px solid #3a2a4a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Remove Admin</button>
-                  : <button onClick={() => toggleAdmin(selectedUser.id, true)} style={{ padding: "10px", borderRadius: 10, background: "#222", color: "#aaa", border: "1px solid #333", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Make Admin</button>
-                }
+                {selectedUser.raw_user_meta_data?.is_admin && (
+                  <button onClick={() => toggleAdmin(selectedUser.id, false)} style={{ padding: "10px", borderRadius: 10, background: "#2a1a3a", color: "#c084fc", border: "1px solid #3a2a4a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Remove Admin</button>
+                )}
                 <button onClick={() => deleteUser(selectedUser.id, selectedUser.email)} style={{ padding: "10px", borderRadius: 10, background: "#3a1a1a", color: "#ff3b30", border: "1px solid #4a2a2a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Delete User & All Data</button>
               </div>
 
