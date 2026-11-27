@@ -940,88 +940,78 @@ function ContactStep({ draft, setDraft }: { draft: Draft; setDraft: React.Dispat
 /* ─── Step: Preview ─────────────────────────────────────── */
 function PreviewStep({ draft, jumpTo }: { draft: Draft; jumpTo: (s: StepKey) => void }) {
   const heroPhoto = draft.previews[0];
-  const speciesInfo = SPECIES_LIST.find(s => s.label === draft.species);
 
   return (
-    <div style={{ paddingTop:4 }}>
-      {/* Pet card mockup */}
-      <div style={{ background:"#fff", borderRadius:24, overflow:"hidden", boxShadow:"0 4px 24px rgba(0,0,0,0.10)", marginBottom:20 }}>
-        {/* Hero photo */}
-        <div style={{ height:200, background: heroPhoto ? "transparent" : "#f0f4f8", position:"relative", overflow:"hidden" }}>
-          {heroPhoto
-            ? <img src={heroPhoto} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-            : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <Camera size={36} color="#ccc" strokeWidth={1.5} />
-              </div>
-          }
-          {/* Status pill */}
-          <div style={{ position:"absolute", top:12, left:12, background: draft.status === "lost" ? "#dc2626" : "#16a34a", padding:"5px 14px", borderRadius:30 }}>
-            <span style={{ fontSize:12, fontWeight:800, color:"#fff", textTransform:"uppercase", letterSpacing:1 }}>{draft.status}</span>
-          </div>
-        </div>
+    <div style={{ paddingTop: 4 }}>
 
-        {/* Details */}
-        <div style={{ padding:"16px 20px 20px" }}>
-          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:12 }}>
-            <div>
-              <h2 style={{ fontSize:22, fontWeight:900, color:"#111" }}>{draft.name || "No name"}</h2>
-              <p style={{ fontSize:14, color:"#888", marginTop:2 }}>
-                {[draft.species, draft.breed].filter(Boolean).join(" · ")}
-              </p>
+      {/* Hero photo */}
+      <div style={{ height: 220, borderRadius: 20, overflow: "hidden", background: "#f0f4f8", position: "relative", marginBottom: 20 }}>
+        {heroPhoto
+          ? <img src={heroPhoto} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Camera size={36} color="#ccc" strokeWidth={1.5} />
             </div>
-            <button onClick={() => jumpTo("name")} style={{ width:34, height:34, borderRadius:12, background:"#f5f5f7", display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <Pencil size={15} color="#555" strokeWidth={1.8} />
+        }
+        <div style={{ position: "absolute", top: 12, left: 12, background: draft.status === "lost" ? "#dc2626" : "#16a34a", padding: "5px 14px", borderRadius: 30 }}>
+          <span style={{ fontSize: 12, fontWeight: 800, color: "#fff", textTransform: "uppercase", letterSpacing: 1 }}>{draft.status}</span>
+        </div>
+        {/* Extra photos strip */}
+        {draft.previews.filter(Boolean).length > 1 && (
+          <div style={{ position: "absolute", bottom: 10, right: 10, display: "flex", gap: 6 }}>
+            {draft.previews.slice(1).filter(Boolean).map((p, i) => (
+              <img key={i} src={p!} style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover", border: "2px solid #fff" }} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Name + species */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: 24, fontWeight: 900, color: "#111", margin: 0 }}>{draft.name || "No name"}</h2>
+          <p style={{ fontSize: 14, color: "#888", marginTop: 4, margin: 0 }}>{[draft.species, draft.breed].filter(Boolean).join(" · ")}</p>
+        </div>
+        <button onClick={() => jumpTo("name")} style={{ width: 34, height: 34, borderRadius: 12, background: "#f5f5f7", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <Pencil size={14} color="#888" strokeWidth={1.8} />
+        </button>
+      </div>
+
+      {/* Info rows */}
+      <div style={{ background: "#fafafa", borderRadius: 18, overflow: "hidden", marginBottom: 20 }}>
+        {[
+          { label: "Color",    value: draft.color,    step: "appearance" as StepKey },
+          { label: "Size",     value: draft.size,     step: "appearance" as StepKey },
+          { label: "Location", value: draft.location, step: "location" as StepKey },
+          { label: "Date",     value: draft.date,     step: "location" as StepKey },
+        ].filter(r => r.value).map((r, i, arr) => (
+          <div key={r.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < arr.length - 1 ? "1px solid #f0f0f0" : "none" }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 11, color: "#bbb", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: 0 }}>{r.label}</p>
+              <p style={{ fontSize: 14, color: "#333", marginTop: 3, margin: 0 }}>{r.value}</p>
+            </div>
+            <button onClick={() => jumpTo(r.step)} style={{ width: 28, height: 28, borderRadius: 8, background: "#eee", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <Pencil size={12} color="#888" strokeWidth={1.8} />
             </button>
           </div>
-
-          {/* Info rows */}
-          {[
-            { label:"Color", value: draft.color, step:"appearance" as StepKey },
-            { label:"Size",  value: draft.size,  step:"appearance" as StepKey },
-            { label:"Location", value: draft.location, step:"location" as StepKey },
-            { label:"Notes", value: draft.notes, step:"appearance" as StepKey },
-          ].filter(r => r.value).map(r => (
-            <div key={r.label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:10, borderTop:"1px solid #f5f5f7" }}>
-              <div>
-                <p style={{ fontSize:11, color:"#aaa", fontWeight:700, textTransform:"uppercase", letterSpacing:0.8 }}>{r.label}</p>
-                <p style={{ fontSize:14, color:"#333", marginTop:2 }}>{r.value}</p>
-              </div>
-              <button onClick={() => jumpTo(r.step)} style={{ width:30, height:30, borderRadius:10, background:"#f5f5f7", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <Pencil size={13} color="#888" strokeWidth={1.8} />
-              </button>
-            </div>
-          ))}
-
-          {/* Photo strip */}
-          {draft.previews.some(Boolean) && (
-            <div style={{ display:"flex", gap:8, marginTop:14, overflowX:"auto" }}>
-              {draft.previews.filter(Boolean).map((p, i) => (
-                <img key={i} src={p!} style={{ width:60, height:60, borderRadius:12, objectFit:"cover", flexShrink:0 }} />
-              ))}
-              <button onClick={() => jumpTo("photos")} style={{ width:60, height:60, borderRadius:12, background:"#f5f5f7", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <Plus size={18} color="#aaa" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Edit sections */}
-      <div style={{ background:"#f8faff", borderRadius:16, padding:"12px 16px", marginBottom:12, display:"flex", alignItems:"flex-start", gap:10 }}>
-        <Pencil size={15} color="#aaa" strokeWidth={1.8} style={{ marginTop:2, flexShrink:0 }} />
-        <p style={{ fontSize:13, color:"#888", lineHeight:1.6 }}>
-          Need to fix something? Tap any section below to jump back and edit, or use the back arrow at the top.
-        </p>
-      </div>
-      <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:8 }}>
-        {(["status","species","name","appearance","photos","location","contact"] as StepKey[]).map(s => (
-          <button key={s} onClick={() => jumpTo(s)}
-            style={{ padding:"9px 16px", background:"#f0f0f5", borderRadius:20, fontSize:13, fontWeight:600, color:"#444", display:"flex", alignItems:"center", gap:6 }}>
-            <Pencil size={12} color="#888" strokeWidth={2} />
-            {s.charAt(0).toUpperCase() + s.slice(1)}
-          </button>
         ))}
       </div>
+
+      {/* Notes */}
+      {draft.notes && (
+        <div style={{ background: "#fafafa", borderRadius: 18, padding: "14px 16px", marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <p style={{ fontSize: 11, color: "#bbb", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 6px" }}>Notes</p>
+            <button onClick={() => jumpTo("appearance")} style={{ width: 28, height: 28, borderRadius: 8, background: "#eee", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <Pencil size={12} color="#888" strokeWidth={1.8} />
+            </button>
+          </div>
+          <p style={{ fontSize: 14, color: "#333", margin: 0, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{draft.notes}</p>
+        </div>
+      )}
+
+      {/* Edit hint */}
+      <p style={{ fontSize: 12, color: "#bbb", textAlign: "center", marginBottom: 8 }}>Tap ✏️ on any section to edit</p>
     </div>
   );
+
 }
